@@ -43,9 +43,13 @@ from .config import (
     AgentConfigError,
 )
 
-from .mcp_client import (
-    AgentMCPClient,
-)
+# Optional MCP client (requires mcp package)
+try:
+    from .mcp_client import AgentMCPClient
+    _HAS_MCP = True
+except ImportError:
+    _HAS_MCP = False
+    AgentMCPClient = None
 
 __all__ = [
     # Base classes
@@ -68,8 +72,9 @@ __all__ = [
     # Configuration
     "AgentConfig",
     "AgentConfigError",
-    
-    # MCP Client
-    "AgentMCPClient",
 ]
+
+# Add MCP client to __all__ only if available
+if _HAS_MCP:
+    __all__.append("AgentMCPClient")
 
