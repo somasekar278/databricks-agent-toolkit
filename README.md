@@ -1,3 +1,5 @@
+[![PyPI](https://img.shields.io/pypi/v/sota-agent-framework)](https://pypi.org/project/sota-agent-framework/)
+
 # SOTA Agent - Universal Agent Workflow Template
 
 **A generic, production-ready template for integrating AI agents into any application or data pipeline.**
