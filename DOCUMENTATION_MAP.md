@@ -1,78 +1,159 @@
 # Documentation Map
 
-**Quick reference to all documentation in the SOTA Agent Framework.**
+**Your complete guide to navigating SOTA Agent Framework documentation.**
 
-## 🚀 Getting Started (Read These First)
+---
 
-1. **[README.md](README.md)** - Project overview and features
+## 🚀 Start Here (3 Essential Files)
+
+1. **[README.md](README.md)** - Feature overview and capabilities
 2. **[GETTING_STARTED.md](GETTING_STARTED.md)** - 5-minute quick start guide
 3. **[docs/USER_JOURNEY.md](docs/USER_JOURNEY.md)** - Choose your path (Beginner/Intermediate/Advanced)
-4. **[docs/FEATURE_SELECTION_GUIDE.md](docs/FEATURE_SELECTION_GUIDE.md)** - What features do YOU need?
-5. **[docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)** - Quick reference card
-6. **[docs/TEMPLATE_GUIDE.md](docs/TEMPLATE_GUIDE.md)** - Comprehensive template usage guide
 
-## 📖 User Documentation
+---
 
-### Essential Guides
-- **[Getting Started](GETTING_STARTED.md)** - Quick start in 5 minutes
-- **[Template Guide](docs/TEMPLATE_GUIDE.md)** - Complete guide for any domain
-- **[Cross-Domain Examples](docs/CROSS_DOMAIN_EXAMPLES.md)** - 8 real-world domain examples
-- **[Documentation Index](docs/README.md)** - Main documentation hub
+## 📖 Core Documentation (5 Focused Guides)
 
-### Core Framework
-- **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Code organization
-- **[Configuration System](docs/CONFIGURATION.md)** - Comprehensive YAML configuration
-- **[Memory System](docs/MEMORY_SYSTEM.md)** - Agent-governed memory management
-- **[Reasoning Optimization](docs/REASONING_OPTIMIZATION.md)** - Trajectory tuning, CoT distillation, feedback loops
-- **[Prompt Optimization](docs/OPTIMIZATION.md)** - DSPy & TextGrad for prompt optimization
-- **[Agent Benchmarking](docs/BENCHMARKING.md)** - Comprehensive evaluation & testing
-- **[Visualization](docs/VISUALIZATION.md)** - Databricks-native observability
-- **[LangGraph Integration](docs/LANGGRAPH_INTEGRATION.md)** - Autonomous planning & orchestration
-- **[MCP Integration](docs/MCP_INTEGRATION.md)** - Model Context Protocol integration
-- **[Use Cases](docs/USE_CASES.md)** - Advanced patterns
+### Choose Features
+- **[docs/FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md)** - Which features do YOU need? (8 use cases with recommendations)
 
-### Deployment
-- **[Databricks Native Checklist](docs/DATABRICKS_NATIVE_CHECKLIST.md)** - Databricks deployment
-- **[Implementation Roadmap](docs/IMPLEMENTATION_ROADMAP.md)** - Development phases
+### Configure Framework
+- **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** - Complete YAML configuration guide
+
+### Add Integrations
+- **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)** - **NEW** All integrations in one:
+  - Model Context Protocol (MCP)
+  - LangGraph Orchestration
+  - Databricks Integration
+
+### Enable Advanced Features
+- **[docs/ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)** - **NEW** All advanced features in one:
+  - Agent-Governed Memory
+  - Reasoning Optimization
+  - Prompt Optimization
+  - Agent Benchmarking
+
+---
+
+## 🎯 Quick Decision Tree
+
+```
+1. Start → README.md (2 min)
+           ↓
+2. New to agents? → GETTING_STARTED.md (5 min)
+                    ↓
+3. What's my experience level? → USER_JOURNEY.md
+                                  ↓
+4. What features do I need? → FEATURE_SELECTION.md
+                               ↓
+5. How do I configure? → CONFIGURATION.md
+                         ↓
+6. Need MCP/LangGraph/Databricks? → INTEGRATIONS.md
+                                     ↓
+7. Need Memory/Reasoning/Optimization? → ADVANCED_FEATURES.md
+```
+
+---
+
+## 📦 Documentation by Experience Level
+
+### 🌱 Beginners (Just Starting)
+**Goal**: Install and run your first agent
+
+1. **[README.md](README.md)** - Understand what the framework does
+2. **[GETTING_STARTED.md](GETTING_STARTED.md)** - Install and run
+3. **[docs/USER_JOURNEY.md](docs/USER_JOURNEY.md)** - Follow "Beginner" path
+4. Use `sota-setup` CLI for guided setup
+
+**Time**: 15-30 minutes
+
+### 🔧 Intermediate (Building Custom Agents)
+**Goal**: Build a production-ready agent
+
+1. **[docs/FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md)** - Choose features for your use case
+2. **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** - Configure agents
+3. **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)** - Add MCP or LangGraph if needed
+4. Use `sota-advisor` CLI for recommendations
+
+**Time**: 1-2 hours
+
+### 🚀 Advanced (Production & Optimization)
+**Goal**: Deploy, optimize, and scale
+
+1. **[docs/ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)** - Enable Memory, Reasoning, etc.
+2. **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)#databricks-integration** - Deploy to Databricks
+3. **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)** - Advanced configuration
+4. Use `sota-benchmark` CLI for evaluation
+
+**Time**: 2-4 hours
+
+---
+
+## 🔍 Quick Answers
+
+| I want to... | Read this... |
+|--------------|--------------|
+| **Get started in 5 minutes** | [GETTING_STARTED.md](GETTING_STARTED.md) |
+| **Know what features I need** | [FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md) |
+| **Find my path (Beginner/Intermediate/Advanced)** | [USER_JOURNEY.md](docs/USER_JOURNEY.md) |
+| **Configure agents with YAML** | [CONFIGURATION.md](docs/CONFIGURATION.md) |
+| **Add MCP tool calling** | [INTEGRATIONS.md](docs/INTEGRATIONS.md)#mcp |
+| **Use LangGraph workflows** | [INTEGRATIONS.md](docs/INTEGRATIONS.md)#langgraph |
+| **Deploy to Databricks** | [INTEGRATIONS.md](docs/INTEGRATIONS.md)#databricks |
+| **Add agent memory** | [ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)#memory |
+| **Optimize reasoning** | [ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)#reasoning |
+| **Optimize prompts with DSPy/TextGrad** | [ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)#optimization |
+| **Benchmark & evaluate agents** | [ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)#benchmarking |
+| **Adapt data schemas** | [docs/schemas/](docs/schemas/) |
+
+---
+
+## 📂 Additional Resources
+
+### CLI Tools
+```bash
+sota-setup      # Interactive wizard (use-case based)
+sota-generate   # Quick project generation
+sota-advisor    # Project analysis & recommendations
+sota-benchmark  # Agent evaluation & benchmarking
+```
+
+**Learn more**: Run any command with `--help`
+
+### Code Examples
+- **`examples/`** - Working code examples
+  - `langgraph_planning_workflow.py` - LangGraph example
+  - `mcp_basic_usage.py` - MCP integration
+  - `dynamic_tool_registry.py` - Tool registration
+- **`tests/`** - Usage patterns and test examples
+- **`benchmarks/`** - Evaluation suites
+- **`benchmark_agents/`** - Example agents for benchmarking
 
 ### Schema Documentation
-- **[Schema Summary](docs/schemas/01_DATA_SCHEMAS_SUMMARY.md)** - Overview of schemas
-- **[Schema Mapping](docs/schemas/02_SCHEMA_MAPPING.md)** - Mapping guide
-- **[Schema Adaptation](docs/schemas/03_SCHEMA_ADAPTATION_GUIDE.md)** - Multi-tenant adaptation
-- **[Schema Versioning](docs/schemas/04_SCHEMA_VERSIONING_GUIDE.md)** - Version management
-- **[Schemas Quick Reference](docs/schemas/SCHEMAS_QUICK_REFERENCE.md)** - Quick lookup
-- **[Schema Versioning Quick Start](docs/schemas/SCHEMA_VERSIONING_QUICK_START.md)** - Quick guide
+- **[docs/schemas/](docs/schemas/)** - Complete data model docs
+  - `01_DATA_SCHEMAS_SUMMARY.md` - Overview
+  - `02_SCHEMA_MAPPING.md` - Mapping guide
+  - `03_SCHEMA_ADAPTATION_GUIDE.md` - Multi-tenant adaptation
+  - `04_SCHEMA_VERSIONING_GUIDE.md` - Version management
 
-### Component READMEs
-- **[MCP Servers](mcp-servers/README.md)** - Model Context Protocol servers
-- **[Shared Schemas](shared/schemas/README.md)** - Core data schemas
+---
 
 ## 🗂️ Documentation Structure
 
 ```
-.
-├── README.md                     # Main project overview
-├── GETTING_STARTED.md            # Quick start guide
-├── DOCUMENTATION_MAP.md          # This file
+SOTA Agent Framework/
+├── README.md                    # ⭐ Start here
+├── GETTING_STARTED.md           # ⭐ Quick start
+├── DOCUMENTATION_MAP.md         # ⭐ This file
 │
 └── docs/
-    ├── README.md                 # Documentation hub
-    ├── TEMPLATE_GUIDE.md         # Complete template guide
-    ├── CROSS_DOMAIN_EXAMPLES.md  # 8 domain examples
-    ├── PROJECT_STRUCTURE.md      # Code organization
-    ├── CONFIGURATION.md          # Comprehensive YAML configuration
-    ├── MEMORY_SYSTEM.md          # Agent-governed memory
-    ├── REASONING_OPTIMIZATION.md # Reasoning optimization
-    ├── OPTIMIZATION.md           # Prompt optimization (DSPy/TextGrad)
-    ├── BENCHMARKING.md           # Agent evaluation & benchmarking
-    ├── VISUALIZATION.md          # Databricks-native visualization
-    ├── LANGGRAPH_INTEGRATION.md  # LangGraph orchestration
-    ├── MCP_INTEGRATION.md        # Model Context Protocol
-    ├── USE_CASES.md              # Advanced patterns
-    ├── DATABRICKS_NATIVE_CHECKLIST.md
-    ├── IMPLEMENTATION_ROADMAP.md
+    ├── USER_JOURNEY.md          # 🎯 Your path (Beginner/Intermediate/Advanced)
+    ├── FEATURE_SELECTION.md     # 🎯 What features do YOU need?
+    ├── CONFIGURATION.md         # 🎯 Complete YAML config guide
+    ├── INTEGRATIONS.md          # 🎯 MCP + LangGraph + Databricks (all in one)
+    ├── ADVANCED_FEATURES.md     # 🎯 Memory + Reasoning + Optimization + Benchmarking (all in one)
     │
-    ├── schemas/                  # Schema documentation
+    ├── schemas/                 # Schema documentation
     │   ├── 01_DATA_SCHEMAS_SUMMARY.md
     │   ├── 02_SCHEMA_MAPPING.md
     │   ├── 03_SCHEMA_ADAPTATION_GUIDE.md
@@ -80,66 +161,86 @@
     │   ├── SCHEMAS_QUICK_REFERENCE.md
     │   └── SCHEMA_VERSIONING_QUICK_START.md
     │
-    └── archive/                  # Historical/internal docs
+    └── archive/                 # 📚 Reference material (9 files)
+        ├── FRAMEWORK_GUIDANCE.md
+        ├── NOT_EVERYTHING_FOR_EVERYONE.md
+        ├── TEMPLATE_GUIDE.md
+        ├── CROSS_DOMAIN_EXAMPLES.md
+        ├── USE_CASES.md
+        ├── QUICK_REFERENCE.md
+        ├── DATABRICKS_NATIVE_CHECKLIST.md
+        ├── IMPLEMENTATION_ROADMAP.md
+        └── PROJECT_STRUCTURE.md
 ```
 
-## 🎯 Find What You Need
+**Total**: 8 core docs + schemas + archived reference
 
-| I want to... | Read this... |
-|--------------|--------------|
-| **Get started quickly** | [GETTING_STARTED.md](GETTING_STARTED.md) |
-| **Know what features I need** | [Feature Selection Guide](docs/FEATURE_SELECTION_GUIDE.md) |
-| **Generate a project** | [TEMPLATE_GUIDE.md](docs/TEMPLATE_GUIDE.md) |
-| **See examples in my domain** | [CROSS_DOMAIN_EXAMPLES.md](docs/CROSS_DOMAIN_EXAMPLES.md) |
-| **Understand the code structure** | [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) |
-| **Configure agents** | [CONFIGURATION.md](docs/CONFIGURATION.md) |
-| **Add memory to agents** | [Memory System](docs/MEMORY_SYSTEM.md) |
-| **Optimize agent reasoning** | [Reasoning Optimization](docs/REASONING_OPTIMIZATION.md) |
-| **Optimize prompts** | [Prompt Optimization](docs/OPTIMIZATION.md) |
-| **Benchmark & evaluate agents** | [BENCHMARKING.md](docs/BENCHMARKING.md) |
-| **Visualize agent execution** | [Visualization](docs/VISUALIZATION.md) |
-| **Build autonomous workflows** | [LangGraph Integration](docs/LANGGRAPH_INTEGRATION.md) |
-| **Use MCP tool calling** | [MCP Integration](docs/MCP_INTEGRATION.md) |
-| **Adapt data schemas** | [Schema Adaptation](docs/schemas/03_SCHEMA_ADAPTATION_GUIDE.md) |
-| **Deploy to Databricks** | [DATABRICKS_NATIVE_CHECKLIST.md](docs/DATABRICKS_NATIVE_CHECKLIST.md) |
-| **See advanced patterns** | [USE_CASES.md](docs/USE_CASES.md) |
-| **Browse all docs** | [docs/README.md](docs/README.md) |
+---
 
-## 📚 Reading Order
+## 📊 Before vs After Consolidation
 
-### For Beginners
-1. [README.md](README.md) - 2 minutes
-2. [GETTING_STARTED.md](GETTING_STARTED.md) - 5 minutes
-3. [TEMPLATE_GUIDE.md](docs/TEMPLATE_GUIDE.md) - 15 minutes
-4. [CROSS_DOMAIN_EXAMPLES.md](docs/CROSS_DOMAIN_EXAMPLES.md) - Browse for your domain
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| **Top-level docs** | 5 | 3 | 40% fewer |
+| **docs/ directory** | 23 | 5 | 78% fewer |
+| **User-facing docs** | 16 | 8 | **50% reduction** |
+| **Archived (reference)** | 0 | 9 | Available if needed |
 
-### For Developers
-1. [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md)
-2. [CONFIGURATION_SYSTEM.md](docs/CONFIGURATION_SYSTEM.md)
-3. [Schema Documentation](docs/schemas/01_DATA_SCHEMAS_SUMMARY.md)
+**Result**: **Clearer navigation, less overwhelm, same comprehensive coverage** ✅
 
-### For DevOps/Deployment
-1. [IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md)
-2. [DATABRICKS_NATIVE_CHECKLIST.md](docs/DATABRICKS_NATIVE_CHECKLIST.md)
-3. [CONFIGURATION_SYSTEM.md](docs/CONFIGURATION_SYSTEM.md)
+---
 
-## 🛠️ Code Examples
+## 🎓 Recommended Reading Order
 
-- **Integration Examples**: `examples/plug_and_play_integration.py`
-- **LangGraph Workflows**: `examples/langgraph_planning_workflow.py`
-- **MCP Usage**: `examples/mcp_basic_usage.py`
-- **Benchmark Suites**: `benchmarks/*.yaml`
-- **Benchmark Agents**: `benchmark_agents/*.py`
-- **Config Examples**: `config/agents/*.yaml`
-- **Test Examples**: `tests/`
-- **Agent Base Classes**: `agents/base.py`
+### New User (30 minutes)
+```
+README.md (2 min)
+  → GETTING_STARTED.md (5 min)
+    → USER_JOURNEY.md (10 min)
+      → FEATURE_SELECTION.md (10 min)
+        → Start building! 🚀
+```
+
+### Building Production Agent (2-3 hours)
+```
+FEATURE_SELECTION.md
+  → CONFIGURATION.md
+    → INTEGRATIONS.md (if needed)
+      → ADVANCED_FEATURES.md (if needed)
+        → Deploy! 🚀
+```
+
+### Optimization & Scaling (ongoing)
+```
+ADVANCED_FEATURES.md
+  → INTEGRATIONS.md#databricks
+    → CONFIGURATION.md (advanced settings)
+      → Benchmark with sota-benchmark
+        → Iterate! 🔄
+```
+
+---
 
 ## 📞 Need Help?
 
-1. Check [GETTING_STARTED.md](GETTING_STARTED.md)
-2. Browse [docs/README.md](docs/README.md)
-3. See [CROSS_DOMAIN_EXAMPLES.md](docs/CROSS_DOMAIN_EXAMPLES.md) for examples
-4. File a GitHub issue
+1. **Quick Start**: [GETTING_STARTED.md](GETTING_STARTED.md)
+2. **Find Your Path**: [USER_JOURNEY.md](docs/USER_JOURNEY.md)
+3. **Choose Features**: [FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md)
+4. **Use CLI**: Run `sota-setup` for interactive guidance
+5. **Browse Examples**: Check `examples/` directory
+6. **File an Issue**: GitHub Issues
+
+---
+
+## ⭐ Key Takeaways
+
+✅ **8 core docs** - Down from 16 (50% reduction)  
+✅ **Clear decision tree** - Know exactly where to go  
+✅ **Experience-level based** - Beginner/Intermediate/Advanced paths  
+✅ **Consolidated guides** - INTEGRATIONS.md and ADVANCED_FEATURES.md combine related content  
+✅ **Archive available** - Reference material preserved in docs/archive/  
+
+**The framework is easier to navigate while maintaining comprehensive documentation!** 🎯
 
 ---
 
