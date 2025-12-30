@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sota-agent-framework"
-version = "0.1.4"
+version = "0.1.5"
 description = "Domain-agnostic agent framework for integrating AI agents into data pipelines"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -73,6 +73,11 @@ ray = [
     "ray[default]>=2.0.0",
 ]
 
+# Model Context Protocol (MCP)
+mcp = [
+    "mcp>=0.1.0",
+]
+
 # Message bus
 messaging = [
     "nats-py>=2.6.0",
@@ -95,7 +100,7 @@ web = [
 
 # All features
 all = [
-    "sota-agent-framework[databricks,agent-frameworks,optimization,ray,messaging,telemetry,web]",
+    "sota-agent-framework[databricks,agent-frameworks,optimization,ray,mcp,messaging,telemetry,web]",
 ]
 
 # Development tools
