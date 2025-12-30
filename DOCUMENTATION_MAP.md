@@ -19,6 +19,7 @@
 ### Core Framework
 - **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Code organization
 - **[Configuration System](docs/CONFIGURATION_SYSTEM.md)** - YAML configuration
+- **[MCP Integration](docs/MCP_INTEGRATION.md)** - Model Context Protocol integration
 - **[Use Cases](docs/USE_CASES.md)** - Advanced patterns
 
 ### Deployment
@@ -75,6 +76,7 @@
 | **See examples in my domain** | [CROSS_DOMAIN_EXAMPLES.md](docs/CROSS_DOMAIN_EXAMPLES.md) |
 | **Understand the code structure** | [PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) |
 | **Configure agents** | [CONFIGURATION_SYSTEM.md](docs/CONFIGURATION_SYSTEM.md) |
+| **Use MCP tool calling** | [MCP Integration](docs/MCP_INTEGRATION.md) |
 | **Adapt data schemas** | [Schema Adaptation](docs/schemas/03_SCHEMA_ADAPTATION_GUIDE.md) |
 | **Deploy to Databricks** | [DATABRICKS_NATIVE_CHECKLIST.md](docs/DATABRICKS_NATIVE_CHECKLIST.md) |
 | **See advanced patterns** | [USE_CASES.md](docs/USE_CASES.md) |
@@ -101,6 +103,7 @@
 ## 🛠️ Code Examples
 
 - **Integration Examples**: `examples/plug_and_play_integration.py`
+- **MCP Usage**: `examples/mcp_basic_usage.py`
 - **Config Examples**: `config/agents/*.yaml`
 - **Test Examples**: `tests/`
 - **Agent Base Classes**: `agents/base.py`

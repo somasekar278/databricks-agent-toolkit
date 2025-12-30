@@ -20,8 +20,15 @@ Originally designed for fraud detection, this architecture template applies to *
 ### Installation
 
 ```bash
-# Install from PyPI (coming soon!)
+# Basic installation
 pip install sota-agent-framework
+
+# With optional features
+pip install sota-agent-framework[mcp]          # MCP tool calling
+pip install sota-agent-framework[ray]          # Distributed execution
+pip install sota-agent-framework[databricks]    # Databricks integration
+pip install sota-agent-framework[optimization]  # DSPy + TextGrad
+pip install sota-agent-framework[all]          # Everything
 
 # Or install from GitHub
 pip install git+https://github.com/somasekar278/universal-agent-template.git
