@@ -149,6 +149,7 @@ sota-generate = "sota_agent.cli:main"
 sota-benchmark = "sota_agent.benchmark_cli:main"
 sota-setup = "sota_agent.setup_wizard:main"
 sota-advisor = "sota_agent.advisor:main"
+sota-learn = "sota_agent.learn:main"
 
 [tool.black]
 line-length = 100

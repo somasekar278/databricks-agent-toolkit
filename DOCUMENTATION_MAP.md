@@ -12,7 +12,10 @@
 
 ---
 
-## 📖 Core Documentation (5 Focused Guides)
+## 📖 Core Documentation (6 Focused Guides)
+
+### Learning & Getting Started
+- **[docs/LEARNING_PATH.md](docs/LEARNING_PATH.md)** - 🎓 **NEW** Learn by building (5 progressively complex examples)
 
 ### Choose Features
 - **[docs/FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md)** - Which features do YOU need? (8 use cases with recommendations)
