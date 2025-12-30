@@ -15,27 +15,36 @@ Originally designed for fraud detection, this architecture template applies to *
 
 ## 🚀 Quick Start
 
-### One-Time Setup (30 seconds)
+### Installation
 
 ```bash
-# Run setup script (Mac/Linux)
-./setup.sh
+# Install from PyPI (coming soon!)
+pip install sota-agent-framework
 
-# Or on Windows
-setup.bat
-
-# Or manually
-pip install -r requirements.txt && pip install -e .
+# Or install from GitHub
+pip install git+https://github.com/somasekar278/universal-agent-template.git
 ```
 
-### Generate Projects (Anytime)
+### Generate Your First Project
 
 ```bash
 # Generate a complete project for your domain
-python template_generator.py --domain "your_domain" --output ./your-project
+sota-generate --domain "your_domain" --output ./your-project
 
+# Navigate and run
 cd your-project
 python examples/example_usage.py  # Works immediately! ✅
+```
+
+### For Contributors/Development
+
+If you're cloning the repo to contribute:
+
+```bash
+git clone https://github.com/somasekar278/universal-agent-template.git
+cd universal-agent-template
+./setup.sh  # or setup.bat on Windows
+python template_generator.py --domain "test"
 ```
 
 ### Path 2: Integrate Into Existing Code (3 lines)

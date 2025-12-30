@@ -117,10 +117,13 @@ Repository = "https://github.com/your-org/sota-agent-framework"
 Issues = "https://github.com/your-org/sota-agent-framework/issues"
 
 [tool.setuptools]
-packages = ["agents", "shared", "mcp_servers"]
+packages = ["agents", "shared", "mcp_servers", "sota_agent"]
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
+
+[project.scripts]
+sota-generate = "sota_agent.cli:main"
 
 [tool.black]
 line-length = 100
