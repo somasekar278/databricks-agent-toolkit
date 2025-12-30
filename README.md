@@ -25,7 +25,13 @@ pip install sota-agent-framework[optimization]  # DSPy + TextGrad
 
 ### Choose Your Path
 
-**🎓 New to Agents?**
+**🎓 Want to Learn? (NEW!)**
+```bash
+sota-learn  # Interactive learning mode - build 5 progressively complex examples
+```
+Learn by building: chatbot → context-aware → production API → complex workflow → autonomous multi-agent
+
+**🚀 New to Agents?**
 ```bash
 sota-setup  # Interactive wizard guides you through
 ```
@@ -44,7 +50,8 @@ from memory import MemoryManager
 from orchestration import AgentWorkflowGraph
 ```
 
-**📖 [See complete getting started guide →](GETTING_STARTED.md)**
+**📖 [See complete getting started guide →](GETTING_STARTED.md)**  
+**🎓 [See learning path →](docs/LEARNING_PATH.md)**
 
 ---
 
@@ -112,6 +119,11 @@ from orchestration import AgentWorkflowGraph
 ## 🛠️ CLI Tools
 
 ```bash
+# 🎓 Interactive learning mode (NEW!)
+sota-learn              # Learn by building 5 progressively complex examples
+sota-learn start 1      # Start Level 1: Simple Chatbot
+sota-learn start 2      # Start Level 2: Context-Aware Assistant
+
 # Interactive setup wizard (use-case based)
 sota-setup
 
