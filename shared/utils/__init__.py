@@ -1,2 +1,2 @@
-"""Shared utilities for SOTA Agent Framework."""
+"""Shared utilities for Agent Framework."""
 

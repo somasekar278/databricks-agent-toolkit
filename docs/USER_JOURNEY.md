@@ -14,10 +14,10 @@
 
 ```bash
 # Install framework
-pip install sota-agent-framework[all]
+pip install agent-framework[all]
 
 # Run interactive setup wizard
-sota-setup
+agent-setup
 ```
 
 **The wizard will:**
@@ -80,7 +80,7 @@ agents:
 
 ```bash
 # Check what you might be missing
-sota-advisor ./my_agent
+agent-advisor ./my_agent
 
 # Read beginner docs
 open docs/GETTING_STARTED.md
@@ -95,10 +95,10 @@ open docs/GETTING_STARTED.md
 ### **Step 1: Quick Setup**
 
 ```bash
-pip install sota-agent-framework[all]
+pip install agent-framework[all]
 
 # Generate with recommended preset
-sota-generate --domain fraud_detection --output ./fraud-agent
+agent-generate --domain fraud_detection --output ./fraud-agent
 ```
 
 ### **Step 2: Choose Your Features**
@@ -106,7 +106,7 @@ sota-generate --domain fraud_detection --output ./fraud-agent
 Run the advisor to see recommendations:
 
 ```bash
-sota-advisor ./fraud-agent
+agent-advisor ./fraud-agent
 ```
 
 **Common patterns:**
@@ -167,7 +167,7 @@ curl http://localhost:8000/health
 curl http://localhost:8000/metrics
 
 # Run benchmarks
-sota-benchmark run --suite my_suite
+agent-benchmark run --suite my_suite
 ```
 
 ---
@@ -180,10 +180,10 @@ sota-benchmark run --suite my_suite
 
 ```bash
 # Install only what you need
-pip install sota-agent-framework
+pip install agent-framework
 
 # Generate minimal project
-sota-generate --domain my_domain --minimal
+agent-generate --domain my_domain --minimal
 ```
 
 ### **Step 2: Pick Components À La Carte**
@@ -310,7 +310,7 @@ monitoring:
 
 ### **For Beginners: Enforced Best Practices**
 
-When you use `sota-setup` in beginner mode:
+When you use `agent-setup` in beginner mode:
 
 ✅ **Automatically Enabled:**
 - Memory system (agent-governed)
@@ -331,10 +331,10 @@ When you use `sota-setup` in beginner mode:
 
 ### **For Intermediate: Recommended Patterns**
 
-Run `sota-advisor` to get recommendations:
+Run `agent-advisor` to get recommendations:
 
 ```bash
-$ sota-advisor ./my_project
+$ agent-advisor ./my_project
 
 🔴 CRITICAL Issues:
   📌 Enable Production Monitoring
@@ -361,10 +361,10 @@ $ sota-advisor ./my_project
 
 ```bash
 # Get recommendations when you want them
-sota-advisor ./my_project --suggestions-only
+agent-advisor ./my_project --suggestions-only
 
 # Validate configuration
-sota-advisor ./my_project --validate-only
+agent-advisor ./my_project --validate-only
 ```
 
 ---
@@ -374,7 +374,7 @@ sota-advisor ./my_project --validate-only
 ### **Scenario 1: "Just make it work"** (Beginner)
 
 ```bash
-sota-setup  # Choose "beginner" mode
+agent-setup  # Choose "beginner" mode
 cd my_agent
 python examples/example_usage.py  # It just works!
 ```
@@ -382,23 +382,23 @@ python examples/example_usage.py  # It just works!
 ### **Scenario 2: "I want recommendations"** (Intermediate)
 
 ```bash
-sota-generate --domain my_domain
+agent-generate --domain my_domain
 cd my_domain
-sota-advisor .  # See what you're missing
+agent-advisor .  # See what you're missing
 # Enable recommended features in framework_config.yaml
 ```
 
 ### **Scenario 3: "Don't tell me what to do"** (Advanced)
 
 ```bash
-sota-generate --domain my_domain --minimal
+agent-generate --domain my_domain --minimal
 # Use only what you want, override everything else
 ```
 
 ### **Scenario 4: "Help me improve"** (Any Level)
 
 ```bash
-sota-advisor ./existing_project  # Analyze existing project
+agent-advisor ./existing_project  # Analyze existing project
 # Get actionable recommendations
 ```
 
@@ -459,7 +459,7 @@ class MyBackend(ExecutionBackend):
 ## 📚 Next Steps by Level
 
 ### **Beginners:**
-1. ✅ Run `sota-setup`
+1. ✅ Run `agent-setup`
 2. ✅ Complete examples/example_usage.py
 3. ✅ Read docs/GETTING_STARTED.md
 4. ✅ Customize config/agents.yaml
@@ -467,7 +467,7 @@ class MyBackend(ExecutionBackend):
 
 ### **Intermediate:**
 1. ✅ Generate project with recommended preset
-2. ✅ Run `sota-advisor` for recommendations
+2. ✅ Run `agent-advisor` for recommendations
 3. ✅ Enable features based on use case
 4. ✅ Create benchmarks in benchmarks/
 5. ✅ Monitor in production

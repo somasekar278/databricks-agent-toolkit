@@ -10,7 +10,7 @@ Official A2A Resources:
 - Spec: https://a2a-protocol.org/docs/specification
 
 Prerequisites:
-    pip install sota-agent-framework[a2a]
+    pip install agent-agent-framework[a2a]
 """
 
 import asyncio
@@ -30,7 +30,7 @@ try:
     )
 except ImportError:
     print("❌ A2A not available")
-    print("Install with: pip install sota-agent-framework[a2a]")
+    print("Install with: pip install agent-agent-framework[a2a]")
     print("or: pip install a2a-sdk")
     sys.exit(1)
 
@@ -253,7 +253,7 @@ async def main():
     
     if not A2A_AVAILABLE:
         print("\n❌ A2A SDK not installed!")
-        print("Install with: pip install sota-agent-framework[a2a]")
+        print("Install with: pip install agent-agent-framework[a2a]")
         print("or: pip install a2a-sdk")
         return
     
@@ -291,7 +291,7 @@ Integration with SOTA Framework:
 Next Steps:
   1. See agents/a2a/ for full implementation
   2. Read https://a2a-protocol.org/docs/specification
-  3. Try Level 5 in learning path (sota-learn start 5)
+  3. Try Level 5 in learning path (agent-learn start 5)
   4. Build cross-framework agent systems!
 """)
 

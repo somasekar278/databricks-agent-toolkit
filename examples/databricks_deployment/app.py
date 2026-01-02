@@ -90,7 +90,7 @@ def create_agent_api() -> FastAPI:
     - GET /agents - List available agents
     """
     app = FastAPI(
-        title="SOTA Agent Framework",
+        title="Agent Framework",
         description="Production agent deployment on Databricks",
         version="1.0.0"
     )
@@ -234,7 +234,7 @@ def create_combined_app() -> FastAPI:
     - /mcp/* - MCP server
     """
     app = FastAPI(
-        title="SOTA Agent Framework - Combined",
+        title="Agent Framework - Combined",
         description="All services in one app"
     )
     

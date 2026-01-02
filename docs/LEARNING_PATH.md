@@ -1,4 +1,4 @@
-# SOTA Agent Framework - Learning Path
+# Agent Framework - Learning Path
 
 **Learn by building: From simple chatbot to autonomous multi-agent system**
 
@@ -430,7 +430,7 @@ print(results.to_markdown())
 
 **Goal**: Full production system with ALL features  
 **Time**: 8-12 hours  
-**Complexity**: ⭐⭐⭐⭐⭐ SOTA
+**Complexity**: ⭐⭐⭐⭐⭐ Agent
 
 ### What You'll Learn
 - ✅ **A2A Protocol** - Official Linux Foundation standard for cross-framework agent communication
@@ -486,7 +486,7 @@ result = await client.execute_task(
 )
 ```
 
-**Why?** A2A enables cross-framework interoperability. Your SOTA agents can collaborate with agents built on LangChain, AutoGPT, CrewAI, or any A2A-compliant framework. It's the industry standard backed by Google and the Linux Foundation.
+**Why?** A2A enables cross-framework interoperability. Your Agent agents can collaborate with agents built on LangChain, AutoGPT, CrewAI, or any A2A-compliant framework. It's the industry standard backed by Google and the Linux Foundation.
 
 **Key Features:**
 - JSON-RPC 2.0 over HTTP(S)
@@ -615,7 +615,7 @@ resource "databricks_model_serving" "agent_endpoint" {
 | 2 | Context-Aware | Agent remembering past conversations | Memory systems |
 | 3 | Production API | API with monitoring deployed locally | Production practices |
 | 4 | Complex Workflow | Agent that plans, acts, and learns | Advanced orchestration |
-| 5 | Multi-Agent System | Full production system on Databricks | Complete SOTA stack |
+| 5 | Multi-Agent System | Full production system on Databricks | Complete Agent stack |
 
 ---
 

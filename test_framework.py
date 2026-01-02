@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive Framework Testing Suite
-Tests the SOTA Agent Framework without requiring full agent builds.
+Tests the Agent Framework without requiring full agent builds.
 
 Usage:
     python test_framework.py              # Run all tests
@@ -31,7 +31,7 @@ class FrameworkTester:
     def run_all_tests(self, quick: bool = False):
         """Run all framework tests."""
         print("="*80)
-        print("🧪 SOTA Agent Framework - Comprehensive Test Suite")
+        print("🧪 Agent Framework - Comprehensive Test Suite")
         print("="*80)
         print()
         
@@ -95,10 +95,10 @@ class FrameworkTester:
     def test_cli_tools(self):
         """Test that CLI tools are accessible."""
         cli_tools = [
-            ("sota-architect", "architect", ["--help"], ["usage", "brief"]),
-            ("sota-learn", "learn", ["--help"], ["usage", "level", "learning"]),
-            ("sota-setup", "setup_wizard", [], ["setup", "wizard", "agent"]),
-            ("sota-generate", "cli", ["--help"], ["usage", "domain", "generate"]),
+            ("agent-architect", "architect", ["--help"], ["usage", "brief"]),
+            ("agent-learn", "learn", ["--help"], ["usage", "level", "learning"]),
+            ("agent-setup", "setup_wizard", [], ["setup", "wizard", "agent"]),
+            ("agent-generate", "cli", ["--help"], ["usage", "domain", "generate"]),
         ]
         
         print(f"\nTesting {len(cli_tools)} CLI tools...\n")
@@ -314,7 +314,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="Test SOTA Agent Framework without building full agents"
+        description="Test Agent Framework without building full agents"
     )
     parser.add_argument(
         "--quick",

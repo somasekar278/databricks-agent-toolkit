@@ -1,4 +1,4 @@
-# Getting Started with SOTA Agent Framework
+# Getting Started with Agent Framework
 
 **Build AI agent workflows for any domain in 5 minutes.**
 
@@ -12,7 +12,7 @@ A universal template for integrating AI agents into applications and data pipeli
 
 ```bash
 # Install from PyPI (easiest!)
-pip install sota-agent-framework
+pip install agent-framework
 
 # Or install from GitHub
 pip install git+https://github.com/somasekar278/universal-agent-template.git
@@ -26,7 +26,7 @@ pip install git+https://github.com/somasekar278/universal-agent-template.git
 
 ```bash
 # 1. Generate project for your domain
-sota-generate --domain "your_domain" --output ./my-agents
+agent-generate --domain "your_domain" --output ./my-agents
 
 # 2. Navigate
 cd my-agents

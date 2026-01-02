@@ -12,7 +12,7 @@ class TestCLITools:
     """Test all CLI commands."""
     
     def test_architect_help(self):
-        """Test sota-architect --help."""
+        """Test agent-architect --help."""
         result = subprocess.run(
             [sys.executable, "-m", "sota_agent.architect", "--help"],
             capture_output=True,
@@ -21,7 +21,7 @@ class TestCLITools:
         assert "usage" in result.stdout.lower() or "brief" in result.stdout.lower()
     
     def test_architect_basic_brief(self):
-        """Test sota-architect with a simple brief."""
+        """Test agent-architect with a simple brief."""
         result = subprocess.run(
             [sys.executable, "-m", "sota_agent.architect", "Build a simple chatbot", "--json"],
             capture_output=True,
@@ -63,7 +63,7 @@ class TestCLITools:
                 assert has_level, f"Expected level {expected_level}, got: {result.stdout[:200]}"
     
     def test_learn_help(self):
-        """Test sota-learn --help."""
+        """Test agent-learn --help."""
         result = subprocess.run(
             [sys.executable, "-m", "sota_agent.learn", "--help"],
             capture_output=True,
@@ -72,7 +72,7 @@ class TestCLITools:
         assert "usage" in result.stdout.lower() or "learn" in result.stdout.lower()
     
     def test_learn_info(self):
-        """Test sota-learn info command."""
+        """Test agent-learn info command."""
         # Test info command with level 1
         result = subprocess.run(
             [sys.executable, "-m", "sota_agent.learn", "info", "1"],
@@ -85,7 +85,7 @@ class TestCLITools:
         assert "chatbot" in result.stdout.lower() or "simple" in result.stdout.lower()
     
     def test_generate_help(self):
-        """Test sota-generate --help."""
+        """Test agent-generate --help."""
         result = subprocess.run(
             [sys.executable, "-m", "sota_agent.cli", "--help"],
             capture_output=True,
@@ -95,7 +95,7 @@ class TestCLITools:
         assert "domain" in result.stdout.lower()
     
     def test_generate_project(self):
-        """Test sota-generate creates a project."""
+        """Test agent-generate creates a project."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_agent"
             result = subprocess.run(
@@ -128,7 +128,7 @@ class TestCLITools:
                 f"Expected project files not found. Created: {[f.name for f in files_created[:10]]}"
     
     def test_setup_wizard(self):
-        """Test sota-setup runs without error."""
+        """Test agent-setup runs without error."""
         result = subprocess.run(
             [sys.executable, "-m", "sota_agent.setup_wizard"],
             capture_output=True,

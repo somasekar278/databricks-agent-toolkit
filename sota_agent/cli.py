@@ -1,4 +1,4 @@
-"""Command-line interface for SOTA Agent Framework."""
+"""Command-line interface for Agent Framework."""
 
 import argparse
 import sys
@@ -8,13 +8,13 @@ from .generator import generate_project
 def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
-        description="SOTA Agent Framework - Generate AI agent projects for any domain",
+        description="Agent Framework - Generate AI agent projects for any domain",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  sota-generate --domain "customer_support"
-  sota-generate --domain "fraud_detection" --output ./fraud-agents
-  sota-generate --domain "trip_planner" --agent-type "ENRICHMENT"
+  agent-generate --domain "customer_support"
+  agent-generate --domain "fraud_detection" --output ./fraud-agents
+  agent-generate --domain "trip_planner" --agent-type "ENRICHMENT"
 
 For more information, visit: https://github.com/somasekar278/universal-agent-template
         """
@@ -57,7 +57,7 @@ For more information, visit: https://github.com/somasekar278/universal-agent-tem
     parser.add_argument(
         "--version",
         action="version",
-        version="SOTA Agent Framework 0.2.0"
+        version="Agent Framework 0.2.0"
     )
     
     args = parser.parse_args()

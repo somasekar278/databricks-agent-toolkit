@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SOTA Agent Framework Validation Script
+Agent Framework Validation Script
 
 Comprehensive validation that tests all major components:
 - Core agent execution
@@ -449,7 +449,7 @@ class FrameworkValidator:
     
     def run_all(self) -> bool:
         """Run all validation tests."""
-        print_header("SOTA Agent Framework Validation")
+        print_header("Agent Framework Validation")
         print_info(f"Starting validation at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
         # Run all tests

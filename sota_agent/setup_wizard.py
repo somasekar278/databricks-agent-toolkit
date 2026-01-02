@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SOTA Agent Framework Setup Wizard
+Agent Framework Setup Wizard
 
 Interactive wizard that guides users through framework setup:
 - Beginner mode: Opinionated defaults with all best practices
@@ -32,7 +32,7 @@ class FrameworkPreset(str, Enum):
 
 class FrameworkSetupWizard:
     """
-    Interactive setup wizard for SOTA Agent Framework.
+    Interactive setup wizard for Agent Framework.
     
     Guides users through:
     - Experience level selection
@@ -90,7 +90,7 @@ class FrameworkSetupWizard:
     def _print_welcome(self):
         """Print welcome message."""
         print("\n" + "="*70)
-        print("🚀 SOTA Agent Framework - Setup Wizard")
+        print("🚀 Agent Framework - Setup Wizard")
         print("="*70)
         print("\nThis wizard will help you set up your agent project with")
         print("best practices and recommended features.\n")
@@ -383,7 +383,7 @@ class FrameworkSetupWizard:
         print("\n🚀 Next Steps:")
         print("  1. Customize agent behavior in config/agents.yaml")
         print("  2. Add custom agents by extending agents.base.Agent")
-        print("  3. Run benchmarks: sota-benchmark run --suite your_suite")
+        print("  3. Run benchmarks: agent-benchmark run --suite your_suite")
         print("  4. View telemetry in Delta Lake")
         print("  5. Experiment with feature flags")
     

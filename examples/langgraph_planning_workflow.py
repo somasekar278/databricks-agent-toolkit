@@ -2,10 +2,10 @@
 LangGraph Planning Workflow Example
 
 Demonstrates autonomous planning, execution, critique, and re-planning
-using LangGraph integration with SOTA Agent Framework.
+using LangGraph integration with Agent Framework.
 
 Prerequisites:
-    pip install sota-agent-framework[agent-frameworks]
+    pip install agent-agent-framework[agent-frameworks]
 
 Usage:
     python examples/langgraph_planning_workflow.py
@@ -270,7 +270,7 @@ async def main():
         
     except ImportError as e:
         print("❌ LangGraph not installed!")
-        print("   Install with: pip install sota-agent-framework[agent-frameworks]")
+        print("   Install with: pip install agent-agent-framework[agent-frameworks]")
         print(f"   Error: {e}")
         return
     except Exception as e:

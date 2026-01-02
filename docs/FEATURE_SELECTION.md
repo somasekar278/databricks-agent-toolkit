@@ -447,12 +447,12 @@ features:
 
 ---
 
-## 🎯 Updated `sota-setup` Behavior
+## 🎯 Updated `agent-setup` Behavior
 
 The wizard now asks about your use case:
 
 ```bash
-$ sota-setup
+$ agent-setup
 
 What are you building?
   1. Simple chatbot
@@ -496,5 +496,5 @@ Select (1-9): 5  # Production API
 
 ---
 
-**Next: Run `sota-setup` and it will ask about YOUR use case!**
+**Next: Run `agent-setup` and it will ask about YOUR use case!**
 

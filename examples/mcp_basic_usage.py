@@ -1,12 +1,12 @@
 """
 Basic MCP Integration Example
 
-Demonstrates how to use MCP (Model Context Protocol) with SOTA Agent Framework.
+Demonstrates how to use MCP (Model Context Protocol) with Agent Framework.
 
 Compatible with MCP v1.25.0+
 
 Prerequisites:
-    pip install sota-agent-framework[mcp]
+    pip install agent-agent-framework[mcp]
 
 Usage:
     python examples/mcp_basic_usage.py
@@ -26,7 +26,7 @@ try:
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
-    print("⚠️  MCP not available. Install with: pip install sota-agent-framework[mcp]")
+    print("⚠️  MCP not available. Install with: pip install agent-agent-framework[mcp]")
 
 
 class DataEnrichmentAgent(Agent):
@@ -260,7 +260,7 @@ async def main():
     # Print next steps
     print("\n📚 Next Steps:")
     if not MCP_AVAILABLE:
-        print("   1. Install MCP: pip install sota-agent-framework[mcp]")
+        print("   1. Install MCP: pip install agent-agent-framework[mcp]")
         print("   2. Configure MCP servers (see docs/MCP_INTEGRATION.md)")
         print("   3. Run this example again")
     else:

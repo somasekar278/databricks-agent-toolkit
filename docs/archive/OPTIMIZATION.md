@@ -1,6 +1,6 @@
 # Prompt Optimization Guide
 
-**SOTA Agent Framework** includes advanced prompt optimization using **DSPy** and **TextGrad**. This guide shows you how to optimize your agent prompts for maximum performance.
+**Agent Framework** includes advanced prompt optimization using **DSPy** and **TextGrad**. This guide shows you how to optimize your agent prompts for maximum performance.
 
 ---
 
@@ -56,10 +56,10 @@ The optimization module provides:
 
 ```bash
 # Install with optimization support
-pip install sota-agent-framework[optimization]
+pip install agent-framework[optimization]
 
 # Or install all features
-pip install sota-agent-framework[all]
+pip install agent-framework[all]
 ```
 
 ### Basic Usage

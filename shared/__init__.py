@@ -1,2 +1,2 @@
-"""Shared utilities and schemas for SOTA Agent Framework."""
+"""Shared utilities and schemas for Agent Framework."""
 

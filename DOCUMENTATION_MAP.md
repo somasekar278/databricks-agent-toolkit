@@ -1,6 +1,6 @@
 # Documentation Map
 
-**Your complete guide to navigating SOTA Agent Framework documentation.**
+**Your complete guide to navigating Agent Framework documentation.**
 
 ---
 
@@ -79,7 +79,7 @@
 1. **[README.md](README.md)** - Understand what the framework does
 2. **[GETTING_STARTED.md](GETTING_STARTED.md)** - Install and run
 3. **[docs/USER_JOURNEY.md](docs/USER_JOURNEY.md)** - Follow "Beginner" path
-4. Use `sota-setup` CLI for guided setup
+4. Use `agent-setup` CLI for guided setup
 
 **Time**: 15-30 minutes
 
@@ -88,7 +88,7 @@
 
 1. **[docs/FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md)** - Choose features for your use case
 2. **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)** - Add MCP or LangGraph if needed
-3. Use `sota-advisor` CLI for recommendations
+3. Use `agent-advisor` CLI for recommendations
 
 **Time**: 1-2 hours
 
@@ -97,7 +97,7 @@
 
 1. **[docs/ADVANCED_FEATURES.md](docs/ADVANCED_FEATURES.md)** - Enable Memory, Reasoning, etc.
 2. **[docs/INTEGRATIONS.md](docs/INTEGRATIONS.md)#databricks-integration** - Deploy to Databricks
-3. Use `sota-benchmark` CLI for evaluation
+3. Use `agent-benchmark` CLI for evaluation
 
 **Time**: 2-4 hours
 
@@ -126,10 +126,10 @@
 
 ### CLI Tools
 ```bash
-sota-setup      # Interactive wizard (use-case based)
-sota-generate   # Quick project generation
-sota-advisor    # Project analysis & recommendations
-sota-benchmark  # Agent evaluation & benchmarking
+agent-setup      # Interactive wizard (use-case based)
+agent-generate   # Quick project generation
+agent-advisor    # Project analysis & recommendations
+agent-benchmark  # Agent evaluation & benchmarking
 ```
 
 **Learn more**: Run any command with `--help`
@@ -150,7 +150,7 @@ sota-benchmark  # Agent evaluation & benchmarking
 ## 🗂️ Documentation Structure
 
 ```
-SOTA Agent Framework/
+Agent Framework/
 ├── README.md                    # ⭐ Start here
 ├── GETTING_STARTED.md           # ⭐ Quick start
 ├── DOCUMENTATION_MAP.md         # ⭐ This file
@@ -213,7 +213,7 @@ FEATURE_SELECTION.md
 ```
 ADVANCED_FEATURES.md
   → INTEGRATIONS.md#databricks
-    → Benchmark with sota-benchmark
+    → Benchmark with agent-benchmark
       → Iterate! 🔄
 ```
 
@@ -224,7 +224,7 @@ ADVANCED_FEATURES.md
 1. **Quick Start**: [GETTING_STARTED.md](GETTING_STARTED.md)
 2. **Find Your Path**: [USER_JOURNEY.md](docs/USER_JOURNEY.md)
 3. **Choose Features**: [FEATURE_SELECTION.md](docs/FEATURE_SELECTION.md)
-4. **Use CLI**: Run `sota-setup` for interactive guidance
+4. **Use CLI**: Run `agent-setup` for interactive guidance
 5. **Browse Examples**: Check `examples/` directory
 6. **File an Issue**: GitHub Issues
 

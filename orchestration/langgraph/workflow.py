@@ -1,7 +1,7 @@
 """
 LangGraph Workflow Orchestration
 
-Provides StateGraph-based workflows that orchestrate SOTA Agent Framework agents
+Provides StateGraph-based workflows that orchestrate Agent Framework agents
 with planning, execution, critique, and re-planning capabilities.
 """
 

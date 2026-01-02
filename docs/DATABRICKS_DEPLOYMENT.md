@@ -1,4 +1,4 @@
-# 🧱 Databricks Deployment Guide - SOTA Agent Framework
+# 🧱 Databricks Deployment Guide - Agent Framework
 
 **Complete guide to deploying agent solutions natively on Databricks.**
 
@@ -275,7 +275,7 @@ app.mount("/mcp", create_mcp_server())
 
 ### Framework Integration
 
-Your SOTA agent solution becomes a Databricks App:
+Your Agent agent solution becomes a Databricks App:
 
 ```python
 # app.py - Databricks App entry point
@@ -368,14 +368,14 @@ app = w.apps.create(
     name="fraud-detection-agent",
     source_code_path="/Workspace/apps/fraud-detection-agent",
     compute={"size": "Small"},
-    description="SOTA Agent Framework deployment"
+    description="Agent Framework deployment"
 )
 
 print(f"App created: {app.url}")
 
-# Method 3: Using sota-deploy CLI
-sota-deploy init --platform databricks-app
-sota-deploy apply --environment production
+# Method 3: Using agent-deploy CLI
+agent-deploy init --platform databricks-app
+agent-deploy apply --environment production
 ```
 
 ### App Structure
@@ -793,7 +793,7 @@ except Exception:
 w.schemas.create(
     catalog_name="main",
     name="agents",
-    comment="SOTA Agent Framework artifacts"
+    comment="Agent Framework artifacts"
 )
 
 # 3. Create volumes for configs and prompts
@@ -1465,7 +1465,7 @@ if __name__ == "__main__":
       },
       "libraries": [
         {"pypi": {"package": "dspy-ai>=2.4.0"}},
-        {"pypi": {"package": "sota-agent-framework[optimization]"}}
+        {"pypi": {"package": "agent-framework[optimization]"}}
       ]
     }
   ],
@@ -1625,7 +1625,7 @@ databricks configure --token
 # Enter workspace URL and personal access token
 
 # 3. Install framework with Databricks extras
-pip install sota-agent-framework[databricks]
+pip install agent-framework[databricks]
 ```
 
 ### Step 1: Set Up Unity Catalog
@@ -1741,9 +1741,9 @@ print(f"✅ Vector Search index created: {index.name}")
 ### Step 5: Deploy Databricks App
 
 ```bash
-# Using sota-deploy CLI
+# Using agent-deploy CLI
 cd your-agent-solution/
-sota-deploy init --platform databricks-app
+agent-deploy init --platform databricks-app
 
 # Review generated files
 cat deployment/databricks/app-config.yml
@@ -2519,11 +2519,11 @@ pip install -r requirements.txt
 python deployment/setup_all.py
 
 # 3. Deploy to Databricks Apps
-sota-deploy init --platform databricks-app
-sota-deploy apply --environment production
+agent-deploy init --platform databricks-app
+agent-deploy apply --environment production
 
 # 4. Verify
-sota-deploy status
+agent-deploy status
 
 # Done! Agent is live at:
 # https://your-workspace.databricks.com/apps/fraud-detection-agent
@@ -2541,5 +2541,5 @@ sota-deploy status
 
 ---
 
-**🎉 Your SOTA agent solution is now production-ready on Databricks!**
+**🎉 Your Agent agent solution is now production-ready on Databricks!**
 
