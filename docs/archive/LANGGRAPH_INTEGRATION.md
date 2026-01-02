@@ -4,7 +4,7 @@
 
 ### **Overview**
 
-The SOTA Agent Framework includes full LangGraph integration, providing:
+The Agent Framework includes full LangGraph integration, providing:
 
 - **🧠 Plan → Act → Critique → Re-plan loops**: Autonomous planning with self-correction
 - **📊 Task decomposition**: Break complex objectives into executable steps  
@@ -17,7 +17,7 @@ The SOTA Agent Framework includes full LangGraph integration, providing:
 ### **Installation**
 
 ```bash
-pip install sota-agent-framework[agent-frameworks]
+pip install agent-framework[agent-frameworks]
 ```
 
 This installs:
@@ -337,7 +337,7 @@ custom_workflow.visualize("my_workflow.png")
 ```python
 from orchestration.langgraph.adapters import agent_to_langgraph_tool
 
-# Convert SOTA agent to LangGraph tool
+# Convert Agent agent to LangGraph tool
 tool_spec = agent_to_langgraph_tool(my_agent)
 
 # Use in custom LangGraph workflows
@@ -414,7 +414,7 @@ A: We integrate YOUR agents into LangGraph workflows, providing pre-built orches
 A: Yes! Extend `PlannerNode` and `CriticNode` classes, or build custom StateGraphs.
 
 **Q: Does this work with existing agents?**  
-A: Yes! Your existing SOTA agents work seamlessly with LangGraph workflows.
+A: Yes! Your existing Agent agents work seamlessly with LangGraph workflows.
 
 **Q: What about performance overhead?**  
 A: Planning/critique adds latency (~100-500ms per iteration). For latency-critical paths, use direct agent execution.

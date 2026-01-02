@@ -2,7 +2,7 @@
 AI-Powered Architecture Advisor
 
 Analyzes natural language use case briefs and recommends the optimal
-SOTA Agent Framework architecture, including:
+Agent Framework architecture, including:
 - Learning level (1-5)
 - Schemas to use
 - Features to enable
@@ -11,14 +11,14 @@ SOTA Agent Framework architecture, including:
 
 Usage:
     # From text
-    sota-architect "I need a fraud detection system with memory and self-improvement"
+    agent-architect "I need a fraud detection system with memory and self-improvement"
     
     # From file
-    sota-architect --file requirements.txt
-    sota-architect --file project_brief.pdf
+    agent-architect --file requirements.txt
+    agent-architect --file project_brief.pdf
     
     # Interactive
-    sota-architect --interactive
+    agent-architect --interactive
 """
 
 import re
@@ -296,7 +296,7 @@ class ArchitectureRecommendation:
 class ArchitectureAdvisor:
     """
     AI-powered architecture advisor that analyzes use case briefs
-    and recommends optimal SOTA Agent Framework architecture.
+    and recommends optimal Agent Framework architecture.
     
     Uses intelligent text analysis that:
     - Focuses on actual requirements, not titles/buzzwords
@@ -308,7 +308,7 @@ class ArchitectureAdvisor:
     def print_capabilities_overview():
         """Print an overview of all framework levels and their capabilities."""
         print("\n" + "="*80)
-        print("📚 SOTA Agent Framework - Complexity Levels Overview")
+        print("📚 Agent Framework - Complexity Levels Overview")
         print("="*80)
         print()
         print("┌─────────┬──────────────────────┬─────────────┬────────────────────────────────┐")
@@ -865,7 +865,7 @@ class ArchitectureAdvisor:
     def print_recommendation(self, rec: ArchitectureRecommendation, show_json: bool = True):
         """Pretty print the recommendation."""
         print("\n" + "="*70)
-        print("🏗️  SOTA Agent Framework - Architecture Recommendation")
+        print("🏗️  Agent Framework - Architecture Recommendation")
         print("="*70)
         
         print(f"\n📊 Recommended Level: {rec.level_name}")
@@ -922,11 +922,11 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description='SOTA Agent Framework Architecture Advisor',
+        description='Agent Framework Architecture Advisor',
         epilog='Examples:\n'
-               '  sota-architect "Build a fraud detection system"\n'
-               '  sota-architect --file requirements.txt\n'
-               '  sota-architect --file project_brief.pdf',
+               '  agent-architect "Build a fraud detection system"\n'
+               '  agent-architect --file requirements.txt\n'
+               '  agent-architect --file project_brief.pdf',
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
@@ -1007,7 +1007,7 @@ def main():
             print(f"\n💡 Try converting your document to .txt or .md format first.")
             sys.exit(1)
     elif args.interactive:
-        print("\n🏗️  SOTA Agent Framework - Architecture Advisor\n")
+        print("\n🏗️  Agent Framework - Architecture Advisor\n")
         print("Describe your use case in natural language, and I'll recommend")
         print("the optimal architecture from our framework.\n")
         brief = input("📝 Use case brief: ").strip()
@@ -1059,18 +1059,18 @@ def main():
         print("🚀 Next Steps")
         print("="*70)
         print(f"\n1️⃣  Start learning at Level {selected_level}:")
-        print(f"   sota-learn start {selected_level}")
+        print(f"   agent-learn start {selected_level}")
         print()
         print(f"2️⃣  Generate project scaffold:")
-        print(f"   sota-generate my_project --level {selected_level}")
+        print(f"   agent-generate my_project --level {selected_level}")
         print()
         print(f"3️⃣  Explore interactively:")
-        print(f"   sota-setup")
+        print(f"   agent-setup")
         print()
         
         if not args.select:
             print(f"💡 Tip: Use --select flag for interactive level selection")
-            print(f"   sota-architect --file your_brief.pdf --select")
+            print(f"   agent-architect --file your_brief.pdf --select")
         
         print("="*70 + "\n")
 

@@ -1,4 +1,4 @@
-# 🧪 SOTA Agent Framework - Comprehensive Testing Guide
+# 🧪 Agent Framework - Comprehensive Testing Guide
 
 **Complete guide to testing the framework without building full agents.**
 
@@ -132,20 +132,20 @@ Test all CLI commands:
 
 ```bash
 # Architecture advisor
-sota-architect "Build a simple chatbot" --json
+agent-architect "Build a simple chatbot" --json
 
 # Learning path
-sota-learn info 1
-sota-learn start 1
+agent-learn info 1
+agent-learn start 1
 
 # Project generation
-sota-generate --domain test_domain --output /tmp/test_agent
+agent-generate --domain test_domain --output /tmp/test_agent
 
 # Setup wizard
-sota-setup
+agent-setup
 
 # Advisor
-sota-advisor examples/
+agent-advisor examples/
 ```
 
 **All 4 CLI tools tested and working!**
@@ -259,8 +259,8 @@ python test_framework.py
 # Comprehensive validation
 pytest tests/ -v --cov=.
 python test_framework.py
-sota-learn start 1  # Build example agents
-sota-learn start 5  # Test multi-agent
+agent-learn start 1  # Build example agents
+agent-learn start 5  # Test multi-agent
 ```
 
 ---
@@ -447,7 +447,7 @@ pip install -r requirements-test.txt
 **Traditional approach:**
 ```bash
 # Build entire agent (hours)
-sota-learn start 1
+agent-learn start 1
 cd learning_level_1_chatbot
 python examples/example_usage.py
 ```

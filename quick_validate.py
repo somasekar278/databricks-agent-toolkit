@@ -4,7 +4,7 @@ Quick Framework Validation
 Tests that all major modules can be imported.
 """
 
-print("🧪 SOTA Agent Framework - Quick Validation\n")
+print("🧪 Agent Framework - Quick Validation\n")
 print("=" * 60)
 
 tests_passed = 0

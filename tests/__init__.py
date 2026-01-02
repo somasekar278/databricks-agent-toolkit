@@ -1,5 +1,5 @@
 """
-Test Suite for SOTA Agent Framework
+Test Suite for Agent Framework
 
 Run tests:
     pytest tests/

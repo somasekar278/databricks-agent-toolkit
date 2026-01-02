@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Template Generator for SOTA Agent Framework
+Template Generator for Agent Framework
 
 Scaffolds a new agent workflow project from the template.
 Usage:
@@ -17,7 +17,7 @@ from typing import Dict, Any
 AGENT_TEMPLATE = """'''
 {domain_title} Agent Implementation
 
-Generated from SOTA Agent Framework template.
+Generated from Agent Framework template.
 '''
 
 from agents import Agent, AgentType, ExecutionPriority
@@ -110,7 +110,7 @@ class {agent_class_name}(Agent):
 
 CONFIG_TEMPLATE = """# {domain_title} Agent Configuration
 #
-# Generated from SOTA Agent Framework template.
+# Generated from Agent Framework template.
 # Customize this configuration for your deployment.
 
 agents:
@@ -133,7 +133,7 @@ agents:
 TEST_TEMPLATE = """'''
 Tests for {domain_title} Agents
 
-Generated from SOTA Agent Framework template.
+Generated from Agent Framework template.
 '''
 
 import pytest
@@ -232,7 +232,7 @@ async def test_{agent_name}_error_handling(test_config):
 EXAMPLE_USAGE_TEMPLATE = """'''
 Example usage of {domain_title} agents
 
-Generated from SOTA Agent Framework template.
+Generated from Agent Framework template.
 '''
 
 import asyncio
@@ -278,11 +278,11 @@ if __name__ == "__main__":
 
 README_TEMPLATE = """# {domain_title} Agents
 
-Generated from SOTA Agent Framework template.
+Generated from Agent Framework template.
 
 ## Overview
 
-This project implements AI agents for {domain_lower} using the SOTA Agent Framework.
+This project implements AI agents for {domain_lower} using the Agent Framework.
 
 ## Project Structure
 
@@ -371,7 +371,7 @@ pytest tests/
 
 ## Resources
 
-- [SOTA Agent Framework Documentation](../docs/)
+- [Agent Framework Documentation](../docs/)
 - [Template Guide](../docs/TEMPLATE_GUIDE.md)
 - [Configuration System](../docs/CONFIGURATION_SYSTEM.md)
 
@@ -382,7 +382,7 @@ MIT
 
 
 REQUIREMENTS_TEMPLATE = """# Requirements for {domain_title} Agents
-# Generated from SOTA Agent Framework template
+# Generated from Agent Framework template
 
 # Core dependencies (required)
 pydantic>=2.0.0
@@ -570,7 +570,7 @@ def generate_project(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate a new agent workflow from SOTA Agent Framework template"
+        description="Generate a new agent workflow from Agent Framework template"
     )
     parser.add_argument(
         "--domain",

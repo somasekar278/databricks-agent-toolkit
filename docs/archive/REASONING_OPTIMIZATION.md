@@ -4,9 +4,9 @@
 
 ## Overview
 
-The SOTA Agent Framework includes a **production-grade reasoning optimization system** that enables agents to learn, improve, and adapt over time.
+The Agent Framework includes a **production-grade reasoning optimization system** that enables agents to learn, improve, and adapt over time.
 
-### What Makes It SOTA?
+### What Makes It Agent?
 
 ✅ **Trajectory Optimization** - Learn optimal action sequences  
 ✅ **CoT Distillation** - Compress reasoning chains (50%+ token savings)  
@@ -22,10 +22,10 @@ The SOTA Agent Framework includes a **production-grade reasoning optimization sy
 
 ```bash
 # With optimization features
-pip install sota-agent-framework[optimization]
+pip install agent-framework[optimization]
 
 # Everything
-pip install sota-agent-framework[all]
+pip install agent-framework[all]
 ```
 
 ### Basic Usage
@@ -596,6 +596,6 @@ class DistillWithDSPy(CoTDistiller):
 **Ready to optimize your agents?** Install now:
 
 ```bash
-pip install sota-agent-framework[optimization]
+pip install agent-framework[optimization]
 ```
 

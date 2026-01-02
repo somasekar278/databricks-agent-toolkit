@@ -4,7 +4,7 @@ Dynamic Tool Registry Example
 Demonstrates runtime tool registration, semantic search, and capability discovery.
 
 Prerequisites:
-    pip install sota-agent-framework
+    pip install agent-agent-framework
     pip install sentence-transformers  # Optional, for semantic search
 
 Usage:

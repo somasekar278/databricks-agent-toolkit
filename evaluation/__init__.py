@@ -14,7 +14,7 @@ Install:
     pip install sota-agent-framework[dev]
 
 Usage:
-    sota-benchmark run --suite fraud --agents all --report md
+    agent-benchmark run --suite fraud --agents all --report md
 """
 
 from .metrics import (

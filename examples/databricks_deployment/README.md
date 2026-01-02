@@ -1,6 +1,6 @@
 # Databricks Deployment Example
 
-**Complete production deployment example for SOTA Agent Framework on Databricks.**
+**Complete production deployment example for Agent Framework on Databricks.**
 
 This example demonstrates the production architecture:
 
@@ -47,7 +47,7 @@ pip install databricks-cli databricks-sdk
 databricks configure --token
 
 # Install framework
-pip install sota-agent-framework[databricks]
+pip install agent-framework[databricks]
 ```
 
 ### 2. Set Up Infrastructure

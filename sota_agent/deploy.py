@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 """
-SOTA Agent Framework - Deployment CLI
+Agent Framework - Deployment CLI
 
 Helps users deploy their agent solutions to various platforms.
 
 Usage:
-    sota-deploy init [--platform docker|k8s|databricks|aws|gcp]
-    sota-deploy build [--tag TAG]
-    sota-deploy push [--registry REGISTRY]
-    sota-deploy apply [--environment ENV]
-    sota-deploy status
+    agent-deploy init [--platform docker|k8s|databricks|aws|gcp]
+    agent-deploy build [--tag TAG]
+    agent-deploy push [--registry REGISTRY]
+    agent-deploy apply [--environment ENV]
+    agent-deploy status
 """
 
 import os
@@ -59,8 +59,8 @@ class DeploymentManager:
         print(f"✅ Deployment configuration created in: {self.deploy_dir}")
         print(f"\n📖 Next steps:")
         print(f"   1. Review and customize configs in {self.deploy_dir}/")
-        print(f"   2. Build: sota-deploy build")
-        print(f"   3. Deploy: sota-deploy apply --environment production")
+        print(f"   2. Build: agent-deploy build")
+        print(f"   3. Deploy: agent-deploy apply --environment production")
     
     def _generate_dockerfile(self):
         """Generate production-ready Dockerfile."""
@@ -541,7 +541,7 @@ This directory contains deployment configurations for your agent solution.
 docker-compose -f deployment/docker-compose.yml up
 
 # Build for production
-sota-deploy build --tag v1.0.0
+agent-deploy build --tag v1.0.0
 
 # Deploy to Kubernetes
 kubectl apply -f deployment/kubernetes/
@@ -586,7 +586,7 @@ export IMAGE_TAG=v1.0.0
         """Build Docker image."""
         
         if not (self.project_dir / "Dockerfile").exists():
-            print("❌ Dockerfile not found. Run 'sota-deploy init' first.")
+            print("❌ Dockerfile not found. Run 'agent-deploy init' first.")
             return False
         
         tag = tag or "latest"
@@ -641,7 +641,7 @@ def main():
     """Main CLI entry point."""
     
     parser = argparse.ArgumentParser(
-        description="SOTA Agent Framework - Deployment CLI",
+        description="Agent Framework - Deployment CLI",
         formatter_class=argparse.RawDescriptionHelpFormatter
     )
     

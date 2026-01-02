@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sota-agent-framework"
-version = "0.4.1"
+version = "0.4.2"
 description = "Domain-agnostic agent framework for integrating AI agents into data pipelines"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 
 authors = [
-    {name = "SOTA Agent Team"}
+    {name = "Agent Framework Team"}
 ]
 
 keywords = [
@@ -120,7 +120,7 @@ ui = [
     "ipython>=8.0.0",
 ]
 
-# Document parsing (for sota-architect --file)
+# Document parsing (for agent-architect --file)
 documents = [
     "PyPDF2>=3.0.0",
     "python-docx>=0.8.11",
@@ -156,13 +156,13 @@ packages.find = {where = ["."], include = ["agents*", "shared*", "sota_agent*", 
 "*" = ["py.typed"]
 
 [project.scripts]
-sota-generate = "sota_agent.cli:main"
-sota-benchmark = "sota_agent.benchmark_cli:main"
-sota-setup = "sota_agent.setup_wizard:main"
-sota-advisor = "sota_agent.advisor:main"
-sota-learn = "sota_agent.learn:main"
-sota-architect = "sota_agent.architect:main"
-sota-deploy = "sota_agent.deploy:main"
+agent-generate = "sota_agent.cli:main"
+agent-benchmark = "sota_agent.benchmark_cli:main"
+agent-setup = "sota_agent.setup_wizard:main"
+agent-advisor = "sota_agent.advisor:main"
+agent-learn = "sota_agent.learn:main"
+agent-architect = "sota_agent.architect:main"
+agent-deploy = "sota_agent.deploy:main"
 
 [tool.black]
 line-length = 100

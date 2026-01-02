@@ -201,7 +201,7 @@ class FrameworkAdvisor:
                 priority="high",
                 title="Create Framework Configuration",
                 description="No framework_config.yaml found",
-                action="Run 'sota-setup' to create configuration",
+                action="Run 'agent-setup' to create configuration",
                 benefit="Centralize all framework settings in one place"
             ))
     
@@ -263,7 +263,7 @@ def main():
     import sys
     
     if len(sys.argv) < 2:
-        print("Usage: sota-advisor <project_directory>")
+        print("Usage: agent-advisor <project_directory>")
         sys.exit(1)
     
     project_dir = sys.argv[1]

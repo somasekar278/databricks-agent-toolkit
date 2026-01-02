@@ -1,5 +1,5 @@
 """
-LangGraph Integration for SOTA Agent Framework
+LangGraph Integration for Agent Framework
 
 Provides cognitive orchestration with:
 - Plan → Act → Critique → Re-plan loops

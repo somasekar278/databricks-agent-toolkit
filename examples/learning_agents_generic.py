@@ -5,7 +5,7 @@ Example agents using domain-agnostic schemas for the learning path.
 These can be adapted to any use case (customer support, analytics, etc.)
 
 Prerequisites:
-    pip install sota-agent-framework
+    pip install agent-agent-framework
 """
 
 import asyncio

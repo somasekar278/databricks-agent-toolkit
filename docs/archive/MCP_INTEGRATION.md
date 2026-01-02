@@ -1,6 +1,6 @@
 # MCP Integration Guide
 
-**Model Context Protocol (MCP)** integration for SOTA Agent Framework.
+**Model Context Protocol (MCP)** integration for Agent Framework.
 
 **Compatible with MCP v1.25.0+**
 
@@ -13,7 +13,7 @@ MCP enables agents to connect to external tools and data sources through a stand
 ### 1. Install with MCP Support
 
 ```bash
-pip install sota-agent-framework[mcp]
+pip install agent-framework[mcp]
 ```
 
 ### 2. Use MCP Client in Your Agent

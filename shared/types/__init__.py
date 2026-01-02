@@ -1,2 +1,2 @@
-"""Shared types for SOTA Agent Framework."""
+"""Shared types for Agent Framework."""
 

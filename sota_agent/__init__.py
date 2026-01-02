@@ -1,4 +1,4 @@
-"""SOTA Agent Framework - Universal template for AI agent workflows."""
+"""Agent Framework - Universal template for AI agent workflows."""
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 

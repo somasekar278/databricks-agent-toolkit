@@ -4,9 +4,9 @@
 
 ## Overview
 
-The SOTA Agent Framework includes a **production-grade memory system** where **agents decide** what to store, retrieve, and forget - not just passive storage.
+The Agent Framework includes a **production-grade memory system** where **agents decide** what to store, retrieve, and forget - not just passive storage.
 
-### What Makes It SOTA?
+### What Makes It Agent?
 
 ✅ **Agent-Governed** - Agents control memory decisions, not just read/write  
 ✅ **Multi-Store Architecture** - Short-term, long-term, episodic, semantic, procedural  
@@ -26,13 +26,13 @@ The SOTA Agent Framework includes a **production-grade memory system** where **a
 
 ```bash
 # Basic memory system
-pip install sota-agent-framework
+pip install agent-framework
 
 # With semantic search
-pip install sota-agent-framework[semantic-search]
+pip install agent-framework[semantic-search]
 
 # Everything
-pip install sota-agent-framework[all]
+pip install agent-framework[all]
 ```
 
 ### Basic Usage
@@ -823,6 +823,6 @@ embedder = SentenceTransformerEmbeddings(
 **Ready to use agent-governed memory?** Install now:
 
 ```bash
-pip install sota-agent-framework[semantic-search]
+pip install agent-framework[semantic-search]
 ```
 

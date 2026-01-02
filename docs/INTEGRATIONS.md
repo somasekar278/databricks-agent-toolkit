@@ -40,7 +40,7 @@ The [Agent2Agent (A2A) Protocol](https://github.com/a2aproject/A2A) is an open p
 
 ```bash
 # Install with A2A support
-pip install sota-agent-framework[a2a]
+pip install agent-framework[a2a]
 ```
 
 ### Exposing Agents via A2A
@@ -103,7 +103,7 @@ card = create_agent_card(
     description="Advanced fraud detection agent",
     url="http://localhost:8080/a2a",
     skills=["fraud_detection", "risk_analysis"],
-    author="SOTA Framework",
+    author="Agent Framework",
     supports_streaming=True
 )
 
@@ -161,7 +161,7 @@ The official A2A SDK is maintained by the Linux Foundation:
 pip install a2a-sdk
 ```
 
-Our integration wraps the official SDK and integrates it seamlessly with SOTA Framework agents.
+Our integration wraps the official SDK and integrates it seamlessly with Agent Framework agents.
 
 **Full Documentation**: See `agents/a2a/` directory and https://a2a-protocol.org/
 
@@ -175,7 +175,7 @@ Our integration wraps the official SDK and integrates it seamlessly with SOTA Fr
 
 ```bash
 # Install with MCP support
-pip install sota-agent-framework[mcp]
+pip install agent-framework[mcp]
 ```
 
 ### Usage
@@ -230,7 +230,7 @@ See `mcp-servers/` directory for examples.
 
 ```bash
 # Install with LangGraph support
-pip install sota-agent-framework[agent-frameworks]
+pip install agent-framework[agent-frameworks]
 ```
 
 ### Usage
@@ -289,7 +289,7 @@ langgraph:
 
 ```bash
 # Install with Databricks support
-pip install sota-agent-framework[databricks]
+pip install agent-framework[databricks]
 ```
 
 ### Features
@@ -425,10 +425,10 @@ if "DATABRICKS_RUNTIME_VERSION" in os.environ:
 
 | Integration | Install Command | Optional Features |
 |-------------|----------------|-------------------|
-| **MCP** | `pip install sota-agent-framework[mcp]` | Tool calling |
-| **LangGraph** | `pip install sota-agent-framework[agent-frameworks]` | Orchestration |
-| **Databricks** | `pip install sota-agent-framework[databricks]` | UC, MLflow, Viz |
-| **All** | `pip install sota-agent-framework[all]` | Everything |
+| **MCP** | `pip install agent-framework[mcp]` | Tool calling |
+| **LangGraph** | `pip install agent-framework[agent-frameworks]` | Orchestration |
+| **Databricks** | `pip install agent-framework[databricks]` | UC, MLflow, Viz |
+| **All** | `pip install agent-framework[all]` | Everything |
 
 ---
 

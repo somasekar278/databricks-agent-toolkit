@@ -12,10 +12,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  sota-benchmark run --suite fraud --agents all --report md
-  sota-benchmark run --suite all --agents myagent --parallel
-  sota-benchmark run --suite customer_support --agents all --report md,json,html
-  sota-benchmark create --suite fraud_detection --output benchmarks/
+  agent-benchmark run --suite fraud --agents all --report md
+  agent-benchmark run --suite all --agents myagent --parallel
+  agent-benchmark run --suite customer_support --agents all --report md,json,html
+  agent-benchmark create --suite fraud_detection --output benchmarks/
 
 For more information, visit: https://github.com/somasekar278/universal-agent-template
         """
@@ -114,7 +114,7 @@ For more information, visit: https://github.com/somasekar278/universal-agent-tem
     parser.add_argument(
         "--version",
         action="version",
-        version="SOTA Agent Framework 0.2.0"
+        version="Agent Framework 0.2.0"
     )
     
     args = parser.parse_args()

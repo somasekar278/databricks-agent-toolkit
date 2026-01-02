@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SOTA Agent Framework - Interactive Learning Mode
+Agent Framework - Interactive Learning Mode
 
 Guides users through building progressively complex agents,
 from simple chatbot to autonomous multi-agent systems.
@@ -104,7 +104,7 @@ LEVELS = {
 def print_banner():
     """Print learning mode banner"""
     print("\n" + "="*70)
-    print("🎓 SOTA Agent Framework - Interactive Learning Mode")
+    print("🎓 Agent Framework - Interactive Learning Mode")
     print("="*70)
     print("\nLearn by building: From simple chatbot to autonomous multi-agent system")
     print()
@@ -250,7 +250,7 @@ pytest tests/
 1. Read `INSTRUCTIONS.md`
 2. Check `../LEARNING_PATH.md`
 3. Look at framework source code
-4. Run `sota-learn --help`
+4. Run `agent-learn --help`
 
 **Good luck! You've got this! 🚀**
 """
@@ -346,7 +346,7 @@ Build a simple Q&A chatbot that demonstrates core agent concepts.
 
 ## Next Level
 
-Once complete, run: `sota-learn start 2`
+Once complete, run: `agent-learn start 2`
 
 **Congratulations on completing Level 1!** 🎉
 """,
@@ -374,7 +374,7 @@ Add memory so your agent remembers past interactions.
 
 ## Next Level
 
-Run: `sota-learn start 3`
+Run: `agent-learn start 3`
 """,
         # Add similar for levels 3, 4, 5
     }
@@ -613,14 +613,14 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description="SOTA Agent Framework - Interactive Learning Mode",
+        description="Agent Framework - Interactive Learning Mode",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  sota-learn                    # Show overview
-  sota-learn info 1             # Show Level 1 details
-  sota-learn start 1            # Create Level 1 project
-  sota-learn start 2 --output my-level2  # Custom output directory
+  agent-learn                    # Show overview
+  agent-learn info 1             # Show Level 1 details
+  agent-learn start 1            # Create Level 1 project
+  agent-learn start 2 --output my-level2  # Custom output directory
 
 Learn by building: From simple chatbot to autonomous multi-agent system!
         """
@@ -653,22 +653,22 @@ Learn by building: From simple chatbot to autonomous multi-agent system!
     if args.command == "overview" or (args.command is None and args.level is None):
         show_overview()
         print("💡 To get started:")
-        print("   sota-learn info 1     # Learn about Level 1")
-        print("   sota-learn start 1    # Create Level 1 project")
+        print("   agent-learn info 1     # Learn about Level 1")
+        print("   agent-learn start 1    # Create Level 1 project")
         print()
     
     elif args.command == "info":
         if not args.level:
-            print("❌ Please specify a level: sota-learn info <level>")
+            print("❌ Please specify a level: agent-learn info <level>")
             sys.exit(1)
         show_level_details(args.level)
         print(f"💡 To start building:")
-        print(f"   sota-learn start {args.level}")
+        print(f"   agent-learn start {args.level}")
         print()
     
     elif args.command == "start":
         if not args.level:
-            print("❌ Please specify a level: sota-learn start <level>")
+            print("❌ Please specify a level: agent-learn start <level>")
             sys.exit(1)
         success = create_level_project(args.level, args.output)
         if not success:

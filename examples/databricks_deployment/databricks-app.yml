@@ -1,8 +1,8 @@
 # Databricks Apps Configuration
-# Production deployment for SOTA Agent Framework
+# Production deployment for Agent Framework
 
 name: sota-agent-production
-description: SOTA Agent Framework - Production deployment with hot pools
+description: Agent Framework - Production deployment with hot pools
 
 # ============================================================================
 # COMPUTE CONFIGURATION (Hot Pool - Always-On)

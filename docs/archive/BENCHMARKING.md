@@ -6,7 +6,7 @@ Comprehensive evaluation suite for testing agent quality, performance, and relia
 
 ## Overview
 
-The SOTA Agent Framework includes a **production-grade benchmarking system** that provides:
+The Agent Framework includes a **production-grade benchmarking system** that provides:
 
 - ✅ **Automated Testing** - Run comprehensive test suites against agents
 - 📊 **Multi-Metric Evaluation** - Tool calls, planning, hallucination, latency, coherence, accuracy
@@ -22,13 +22,13 @@ The SOTA Agent Framework includes a **production-grade benchmarking system** tha
 ### 1. Install with Benchmarking Support
 
 ```bash
-pip install sota-agent-framework[dev]
+pip install agent-framework[dev]
 ```
 
 ### 2. Run Your First Benchmark
 
 ```bash
-sota-benchmark run --suite fraud --agents all --report md
+agent-benchmark run --suite fraud --agents all --report md
 ```
 
 ### 3. View Results
@@ -45,7 +45,7 @@ Results are saved to `benchmark_results/`:
 ### Run Benchmarks
 
 ```bash
-sota-benchmark run [OPTIONS]
+agent-benchmark run [OPTIONS]
 ```
 
 **Options:**
@@ -64,22 +64,22 @@ sota-benchmark run [OPTIONS]
 
 ```bash
 # Run all benchmarks
-sota-benchmark run --suite all --agents all
+agent-benchmark run --suite all --agents all
 
 # Test specific agent
-sota-benchmark run --suite fraud --agents myagent
+agent-benchmark run --suite fraud --agents myagent
 
 # Parallel execution with all report formats
-sota-benchmark run --suite all --agents all --parallel --report md,json,html
+agent-benchmark run --suite all --agents all --parallel --report md,json,html
 
 # Custom metrics
-sota-benchmark run --suite fraud --agents all --metrics tool_call_success,accuracy,latency
+agent-benchmark run --suite fraud --agents all --metrics tool_call_success,accuracy,latency
 ```
 
 ### Create Benchmark Suite
 
 ```bash
-sota-benchmark create --suite <name> [OPTIONS]
+agent-benchmark create --suite <name> [OPTIONS]
 ```
 
 **Options:**
@@ -90,19 +90,19 @@ sota-benchmark create --suite <name> [OPTIONS]
 **Example:**
 
 ```bash
-sota-benchmark create --suite customer_support --num-tests 10
+agent-benchmark create --suite customer_support --num-tests 10
 ```
 
 ### List Suites and Agents
 
 ```bash
-sota-benchmark list [OPTIONS]
+agent-benchmark list [OPTIONS]
 ```
 
 **Example:**
 
 ```bash
-sota-benchmark list
+agent-benchmark list
 ```
 
 ---
@@ -298,7 +298,7 @@ class Agent:
         return {"result": "..."}
 ```
 
-### Integrating SOTA Framework Agents
+### Integrating Agent Framework Agents
 
 ```python
 from agents.base import EnrichmentAgent
@@ -502,11 +502,11 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install sota-agent-framework[dev]
+          pip install agent-framework[dev]
       
       - name: Run benchmarks
         run: |
-          sota-benchmark run --suite all --agents all --report md,json
+          agent-benchmark run --suite all --agents all --report md,json
       
       - name: Upload results
         uses: actions/upload-artifact@v3
@@ -597,7 +597,7 @@ print("✅ All agents passed regression check")
 ### 1. Create Suite
 
 ```bash
-sota-benchmark create --suite customer_support --num-tests 10
+agent-benchmark create --suite customer_support --num-tests 10
 ```
 
 ### 2. Customize Test Cases
@@ -639,7 +639,7 @@ async def evaluate(input_data: dict) -> dict:
 ### 4. Run Benchmarks
 
 ```bash
-sota-benchmark run --suite customer_support --agents support_agent --report md,html
+agent-benchmark run --suite customer_support --agents support_agent --report md,html
 ```
 
 ### 5. Review Results
@@ -680,7 +680,7 @@ Open `benchmark_results/benchmark_report.html` in browser.
 **Issue:** Module import failures
 
 **Solution:**
-- Install framework: `pip install sota-agent-framework[dev]`
+- Install framework: `pip install agent-framework[dev]`
 - Ensure agents can import required modules
 - Check PYTHONPATH if using custom structure
 
@@ -730,7 +730,7 @@ your_project/
 
 ## Next Steps
 
-- **Create your first benchmark:** `sota-benchmark create --suite mysuite`
+- **Create your first benchmark:** `agent-benchmark create --suite mysuite`
 - **Explore examples:** See `benchmarks/fraud_detection.yaml`
 - **Add custom metrics:** Extend `Metric` class
 - **Integrate with CI/CD:** Add to GitHub Actions

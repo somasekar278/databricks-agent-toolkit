@@ -6,7 +6,7 @@
 
 ## Overview
 
-The **Architecture Advisor** (`sota-architect`) is an intelligent system that analyzes natural language use case descriptions and automatically recommends the optimal SOTA Agent Framework architecture.
+The **Architecture Advisor** (`agent-architect`) is an intelligent system that analyzes natural language use case descriptions and automatically recommends the optimal Agent Framework architecture.
 
 **Key Features:**
 - 🤖 **Natural Language Understanding** - Describe your use case in plain English
@@ -23,17 +23,17 @@ The **Architecture Advisor** (`sota-architect`) is an intelligent system that an
 
 ```bash
 # Analyze a use case brief
-sota-architect "Build a fraud detection system with memory and self-improvement"
+agent-architect "Build a fraud detection system with memory and self-improvement"
 ```
 
 ### From Document File (NEW!)
 
 ```bash
 # Parse and analyze a document
-sota-architect --file requirements.txt
-sota-architect --file project_brief.md
-sota-architect --file use_case.pdf
-sota-architect --file proposal.docx
+agent-architect --file requirements.txt
+agent-architect --file project_brief.md
+agent-architect --file use_case.pdf
+agent-architect --file proposal.docx
 ```
 
 **Supported formats:**
@@ -44,7 +44,7 @@ sota-architect --file proposal.docx
 
 **Install document parsing:**
 ```bash
-pip install sota-agent-framework[documents]
+pip install agent-framework[documents]
 # Or
 pip install PyPDF2 python-docx
 ```
@@ -53,17 +53,17 @@ pip install PyPDF2 python-docx
 
 ```bash
 # Prompt-based interaction
-sota-architect --interactive
+agent-architect --interactive
 ```
 
 ### JSON Output
 
 ```bash
 # Get machine-readable output
-sota-architect "Simple customer support chatbot" --json
+agent-architect "Simple customer support chatbot" --json
 
 # Also works with files
-sota-architect --file brief.txt --json
+agent-architect --file brief.txt --json
 ```
 
 ---
@@ -128,7 +128,7 @@ Automatically selects appropriate schemas:
 
 **Brief:**
 ```bash
-sota-architect "Build a simple customer support chatbot to answer FAQ questions"
+agent-architect "Build a simple customer support chatbot to answer FAQ questions"
 ```
 
 **Recommendation:**
@@ -147,8 +147,8 @@ sota-architect "Build a simple customer support chatbot to answer FAQ questions"
 ⏱️  Estimated Effort: 2-4 hours
 
 🚀 Next Steps:
-   1. Run: sota-learn start 1
-   2. Or: sota-generate customer_support_bot --level 1
+   1. Run: agent-learn start 1
+   2. Or: agent-generate customer_support_bot --level 1
    3. Enable features as needed
 ```
 
@@ -156,7 +156,7 @@ sota-architect "Build a simple customer support chatbot to answer FAQ questions"
 
 **Brief:**
 ```bash
-sota-architect "Healthcare assistant that remembers patient history and personalizes responses"
+agent-architect "Healthcare assistant that remembers patient history and personalizes responses"
 ```
 
 **Recommendation:**
@@ -183,7 +183,7 @@ sota-architect "Healthcare assistant that remembers patient history and personal
 
 **Brief:**
 ```bash
-sota-architect "Production-grade analytics API with monitoring and health checks for enterprise deployment"
+agent-architect "Production-grade analytics API with monitoring and health checks for enterprise deployment"
 ```
 
 **Recommendation:**
@@ -214,7 +214,7 @@ sota-architect "Production-grade analytics API with monitoring and health checks
 
 **Brief:**
 ```bash
-sota-architect "Fraud detection system that plans investigations, learns from feedback, and improves over time"
+agent-architect "Fraud detection system that plans investigations, learns from feedback, and improves over time"
 ```
 
 **Recommendation:**
@@ -248,7 +248,7 @@ sota-architect "Fraud detection system that plans investigations, learns from fe
 
 **Brief:**
 ```bash
-sota-architect "Enterprise multi-agent system with A2A protocol for cross-framework collaboration and Databricks integration"
+agent-architect "Enterprise multi-agent system with A2A protocol for cross-framework collaboration and Databricks integration"
 ```
 
 **Recommendation:**
@@ -305,7 +305,7 @@ Requirements:
 
 **Command:**
 ```bash
-sota-architect --file requirements.txt
+agent-architect --file requirements.txt
 ```
 
 **Output:**
@@ -339,28 +339,28 @@ Enterprise trading system with multiple specialized agents.
 
 **Command:**
 ```bash
-sota-architect --file project_brief.md --json
+agent-architect --file project_brief.md --json
 ```
 
 ### Example: PDF Proposal
 
 ```bash
 # Parse PDF business proposal
-sota-architect --file business_proposal.pdf
+agent-architect --file business_proposal.pdf
 
 # Extract architecture requirements from PDF RFP
-sota-architect --file rfp_document.pdf --json > analysis.json
+agent-architect --file rfp_document.pdf --json > analysis.json
 ```
 
 ### Example: Word Document
 
 ```bash
 # Parse Word document
-sota-architect --file technical_spec.docx
+agent-architect --file technical_spec.docx
 
 # Use in automation pipeline
-LEVEL=$(sota-architect --file spec.docx --json | jq -r '.level')
-sota-learn start $LEVEL
+LEVEL=$(agent-architect --file spec.docx --json | jq -r '.level')
+agent-learn start $LEVEL
 ```
 
 ---
@@ -371,7 +371,7 @@ sota-learn start $LEVEL
 
 ```bash
 # Get JSON output
-sota-architect "Financial trading bot" --json
+agent-architect "Financial trading bot" --json
 
 # Output:
 {
@@ -409,16 +409,16 @@ sota-architect "Financial trading bot" --json
 
 ```bash
 # 1. Get recommendation
-sota-architect "Healthcare diagnostic assistant" --json > recommendation.json
+agent-architect "Healthcare diagnostic assistant" --json > recommendation.json
 
 # 2. Extract level
 LEVEL=$(cat recommendation.json | jq -r '.level')
 
 # 3. Generate project with recommended level
-sota-learn start $LEVEL
+agent-learn start $LEVEL
 
-# 4. Or use sota-generate
-sota-generate healthcare_assistant --level $LEVEL
+# 4. Or use agent-generate
+agent-generate healthcare_assistant --level $LEVEL
 ```
 
 ---
@@ -469,23 +469,23 @@ recommendation = advisor.analyze_brief("Your brief here")
 
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| **sota-architect** | Architecture recommendation | Natural language brief | Level + features + schemas |
-| **sota-setup** | Interactive wizard | User answers questions | Feature selection |
-| **sota-advisor** | Project analysis | Existing project path | Recommendations |
-| **sota-learn** | Guided learning | Level selection | Learning project |
-| **sota-generate** | Project generation | Project name + params | Full project |
+| **agent-architect** | Architecture recommendation | Natural language brief | Level + features + schemas |
+| **agent-setup** | Interactive wizard | User answers questions | Feature selection |
+| **agent-advisor** | Project analysis | Existing project path | Recommendations |
+| **agent-learn** | Guided learning | Level selection | Learning project |
+| **agent-generate** | Project generation | Project name + params | Full project |
 
-**When to use `sota-architect`:**
+**When to use `agent-architect`:**
 - ✅ Starting a new project
 - ✅ Unsure which level to use
 - ✅ Want automated recommendations
 - ✅ Need to explain architecture to stakeholders
 
 **When to use other tools:**
-- `sota-setup`: Want interactive guidance
-- `sota-advisor`: Have existing code to analyze
-- `sota-learn`: Want step-by-step learning
-- `sota-generate`: Know exactly what you need
+- `agent-setup`: Want interactive guidance
+- `agent-advisor`: Have existing code to analyze
+- `agent-learn`: Want step-by-step learning
+- `agent-generate`: Know exactly what you need
 
 ---
 
@@ -520,8 +520,8 @@ recommendation = advisor.analyze_brief("Your brief here")
 **Solutions:**
 1. Be more specific in your brief
 2. Mention key features explicitly
-3. Use interactive mode: `sota-architect --interactive`
-4. Combine with `sota-setup` for guided experience
+3. Use interactive mode: `agent-architect --interactive`
+4. Combine with `agent-setup` for guided experience
 
 ### Unexpected Level Recommendation
 
@@ -530,8 +530,8 @@ recommendation = advisor.analyze_brief("Your brief here")
 **Solutions:**
 1. Check the reasoning section
 2. Verify feature requirements in your brief
-3. Manually specify level: `sota-learn start <level>`
-4. Use `sota-setup` for more control
+3. Manually specify level: `agent-learn start <level>`
+4. Use `agent-setup` for more control
 
 ### Missing Features
 
@@ -572,27 +572,27 @@ recommendation = advisor.analyze_brief("Your brief here")
 
 ### Customer Support
 ```bash
-sota-architect "Customer support agent with ticket classification, sentiment analysis, and automated responses"
+agent-architect "Customer support agent with ticket classification, sentiment analysis, and automated responses"
 ```
 
 ### Healthcare
 ```bash
-sota-architect "Medical diagnosis assistant that remembers patient history and provides personalized recommendations"
+agent-architect "Medical diagnosis assistant that remembers patient history and provides personalized recommendations"
 ```
 
 ### Finance
 ```bash
-sota-architect "Trading bot with market analysis, risk assessment, and portfolio optimization using real-time data"
+agent-architect "Trading bot with market analysis, risk assessment, and portfolio optimization using real-time data"
 ```
 
 ### E-commerce
 ```bash
-sota-architect "Product recommendation engine with personalization, A/B testing, and performance monitoring"
+agent-architect "Product recommendation engine with personalization, A/B testing, and performance monitoring"
 ```
 
 ### Legal
 ```bash
-sota-architect "Contract analysis system with clause extraction, risk scoring, and compliance checking"
+agent-architect "Contract analysis system with clause extraction, risk scoring, and compliance checking"
 ```
 
 ---
@@ -610,10 +610,10 @@ sota-architect "Contract analysis system with clause extraction, risk scoring, a
 
 ```bash
 # Basic usage
-sota-architect <brief>              # Text brief via CLI
-sota-architect --file <path>        # Parse document file
-sota-architect --interactive        # Interactive mode
-sota-architect <brief> --json       # JSON output
+agent-architect <brief>              # Text brief via CLI
+agent-architect --file <path>        # Parse document file
+agent-architect --interactive        # Interactive mode
+agent-architect <brief> --json       # JSON output
 
 # Flags
 --file <path>, -f    # Path to document (.txt, .md, .pdf, .docx)
@@ -621,24 +621,24 @@ sota-architect <brief> --json       # JSON output
 --json, -j           # Output as JSON
 
 # Examples
-sota-architect "Simple chatbot"
-sota-architect --file requirements.txt
-sota-architect --file brief.pdf --json
-sota-architect --interactive
-sota-architect "Multi-agent system" --json
+agent-architect "Simple chatbot"
+agent-architect --file requirements.txt
+agent-architect --file brief.pdf --json
+agent-architect --interactive
+agent-architect "Multi-agent system" --json
 
 # Automation pipeline
-sota-architect --file spec.md --json | jq -r '.level' | xargs sota-learn start
+agent-architect --file spec.md --json | jq -r '.level' | xargs agent-learn start
 ```
 
 ### Installation for Document Parsing
 
 ```bash
 # Full installation with document parsing
-pip install sota-agent-framework[all]
+pip install agent-framework[all]
 
 # Or just document parsing
-pip install sota-agent-framework[documents]
+pip install agent-framework[documents]
 
 # Or manual
 pip install PyPDF2 python-docx
