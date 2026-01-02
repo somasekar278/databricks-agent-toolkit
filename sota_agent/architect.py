@@ -379,7 +379,18 @@ class ArchitectureAdvisor:
                 r'\biterat\w+\s+(improve|refine|enhance|adjust)',
                 r'\brevise.{0,20}strateg', r'\b(refine|adjust)\s+.{0,20}(approach|strategy|plan)',
                 r'\bimprove.{0,20}strateg.{0,20}over\s+time',
-                r'\bevaluat\w+.{0,20}(quality|performance).{0,20}(and|then).{0,20}(improv|adjust|refine)'
+                r'\bevaluat\w+.{0,20}(quality|performance).{0,20}(and|then).{0,20}(improv|adjust|refine)',
+                # Enterprise orchestration patterns
+                r'\borchestrat(or|ion|e)\b',
+                r'\bgovernance\b',
+                r'\benterprise.?scale\b',
+                r'\bbulk\s+(generation|processing|operation)',
+                r'\b(automated|automatic)\s+discovery\b',
+                r'\bmulti.?level\s+(governance|system|hierarchy)',
+                r'\bcontinuous\s+(learning|improvement|monitoring)',
+                r'\bscale\s+to\s+\d+\+',
+                r'\b(hundreds?|thousands?)\s+of\s+\w+',
+                r'\bpipeline\s+(orchestration|management|workflow)'
             ],
             ComplexityLevel.EXPERT: [
                 r'\bmultiple\s+.{0,30}agents?\s+.{0,50}(communicate|collaborate|coordinate)',
@@ -395,7 +406,13 @@ class ArchitectureAdvisor:
                 r'\bagents?\s+.{0,30}request\s+.{0,20}(help|consultation)',
                 r'\bseparate\s+agents?\s+for\b',
                 r'\bspecialized\s+agents?\b.{0,50}(coordinate|collaborate|work\s+together)',
-                r'\bagents?\s+for\s+(different|various)\s+.{0,30}(must|should|need).{0,50}(coordinate|collaborate|communicate)'
+                r'\bagents?\s+for\s+(different|various)\s+.{0,30}(must|should|need).{0,50}(coordinate|collaborate|communicate)',
+                # Multi-component/multi-agent patterns
+                r'\bmulti.?agent\b',
+                r'\bmultiple\s+(components?|services?|systems?)\s+.{0,50}(coordin|integrat|collaborat)',
+                r'\bmulti.?level\s+(system|governance|architecture)',
+                r'\b(separate|distinct|specialized)\s+(components?|services?|systems?)\s+.{0,50}(coordin|collaborat|communicat)',
+                r'\b(component|service|system)\s+.{0,30}(coordinates?|orchestrates?)\s+.{0,30}(other|multiple)'
             ]
         }
         
@@ -413,9 +430,10 @@ class ArchitectureAdvisor:
             'langgraph': [
                 r'\bmulti.?step\s+\w+\s+(workflow|process|pipeline)\b',
                 r'\bplan\s+and\s+execute\b', r'\bstate\s+machine\b',
-                r'\borchestrat\w+\s+\w+\s+(tasks|steps)\b',
+                r'\borchestrat(or|ion|e|ing)\b',
                 r'\bsequential\s+\w+\s+processing\b',
-                r'\bworkflow\s+\w+\s+(coordination|management)\b'
+                r'\bworkflow\s+(coordination|management|orchestration)\b',
+                r'\bpipeline\s+(management|orchestration)\b'
             ],
             'mcp': [
                 r'\bexternal\s+\w+\s+(api|service|tool)\b',
