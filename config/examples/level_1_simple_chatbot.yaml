@@ -1,0 +1,70 @@
+# ============================================================================
+# Level 1: Simple Chatbot (2-4 hours)
+# ============================================================================
+# 
+# What this level includes:
+# - Single stateless agent
+# - Basic LLM integration
+# - Simple request/response
+# - No memory, no monitoring
+# - Perfect for learning basics
+#
+# Use case examples:
+# - Basic chatbot
+# - Simple Q&A system
+# - Text completion
+# ============================================================================
+
+environment: dev
+
+# ============================================================================
+# AGENTS - Simple single agent
+# ============================================================================
+
+agents:
+  chatbot:
+    enabled: true
+    model_endpoint: "databricks-dbrx-instruct"
+    system_prompt: "You are a helpful assistant. Answer questions concisely."
+    max_tokens: 500
+    temperature: 0.7
+
+# ============================================================================
+# MONITORING - Disabled for L1
+# ============================================================================
+
+monitoring:
+  deployment_mode: "disabled"
+  enabled: false
+
+# ============================================================================
+# OPTIMIZATION - Disabled for L1
+# ============================================================================
+
+optimization:
+  enabled: false
+
+# ============================================================================
+# DATABRICKS - Minimal config
+# ============================================================================
+
+databricks:
+  workspace:
+    host: ${DATABRICKS_HOST}
+    token: ${DATABRICKS_TOKEN}
+  
+  model_serving:
+    endpoint: "databricks-dbrx-instruct"
+
+# ============================================================================
+# TELEMETRY - Disabled for L1
+# ============================================================================
+
+telemetry:
+  otel:
+    enabled: false
+  mlflow:
+    enabled: false
+
+
+

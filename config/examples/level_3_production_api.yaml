@@ -1,0 +1,207 @@
+# ============================================================================
+# Level 3: Production-Ready API (8-16 hours)
+# ============================================================================
+# 
+# What this level adds:
+# - ✅ RESTful API endpoints
+# - ✅ Async execution
+# - ✅ Error handling & retries
+# - ✅ Rate limiting
+# - ✅ Full observability (OTEL + MLflow)
+# - ✅ Delta Lake storage
+# - ✅ Basic monitoring
+#
+# Use case examples:
+# - Production chatbot API
+# - Content generation service
+# - Document analyzer API
+# ============================================================================
+
+environment: production
+
+# ============================================================================
+# AGENTS - Production-grade single agent
+# ============================================================================
+
+agents:
+  api_agent:
+    enabled: true
+    model_endpoint: "databricks-dbrx-instruct"
+    system_prompt: "You are a production API agent. Provide accurate, concise responses."
+    max_tokens: 2000
+    temperature: 0.5  # Lower for consistency
+    
+    # Execution configuration
+    execution:
+      mode: "async"  # Non-blocking
+      timeout: 30
+      max_retries: 3
+      retry_delay: 1
+    
+    # Rate limiting
+    rate_limit:
+      requests_per_minute: 60
+      burst_size: 10
+    
+    # Memory configuration
+    memory:
+      enabled: true
+      type: "persistent"
+      backend: "delta"
+      retention_days: 30
+
+# ============================================================================
+# MEMORY SYSTEM - Delta Lake backed
+# ============================================================================
+
+memory:
+  enabled: true
+  
+  storage:
+    type: "delta"
+    table: "main.agents.memory"
+    partitioned_by: ["date", "agent_id"]
+  
+  retrieval:
+    strategy: "semantic"  # Semantic search
+    max_items: 5
+    similarity_threshold: 0.7
+
+# ============================================================================
+# MCP SERVERS - Optional for document/knowledge retrieval
+# ============================================================================
+# Uncomment if your agent needs external knowledge retrieval beyond conversation memory.
+# Example use cases: Document analyzer, content search, knowledge Q&A
+#
+# mcp:
+#   deployment_mode: "external"
+#   
+#   external:
+#     enabled: true
+#     
+#     # Vector Search: Search document embeddings
+#     vector_search_docs:
+#       endpoint: "https://${DATABRICKS_HOST}/api/2.0/mcp/vector-search/prod/documents"
+#       timeout_seconds: 30
+#       retry_attempts: 3
+#       auth:
+#         type: "bearer_token"
+#         token: "${DATABRICKS_TOKEN}"
+#     
+#     # Optional: UC Functions for custom business logic
+#     # uc_functions_utils:
+#     #   endpoint: "https://${DATABRICKS_HOST}/api/2.0/mcp/functions/prod/utils"
+#     #   timeout_seconds: 30
+#     #   auth:
+#     #     type: "bearer_token"
+#     #     token: "${DATABRICKS_TOKEN}"
+
+# ============================================================================
+# MONITORING - Basic embedded monitoring
+# ============================================================================
+
+monitoring:
+  deployment_mode: "embedded"
+  enabled: true
+  check_interval_seconds: 600  # Check every 10 minutes
+  
+  agents:
+    api_agent:
+      enabled: true
+      priority: "medium"
+      thresholds:
+        error_rate: 0.05  # 5% max errors
+        latency: 5.0      # 5s max response time
+      cooldown_hours: 24
+  
+  notification_channels:
+    slack:
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      default_channel: "#api-alerts"
+
+# ============================================================================
+# OPTIMIZATION - Disabled for L3 (manual only)
+# ============================================================================
+
+optimization:
+  enabled: false
+
+# ============================================================================
+# DATABRICKS - Production configuration
+# ============================================================================
+
+databricks:
+  workspace:
+    host: ${DATABRICKS_HOST}
+    token: ${DATABRICKS_TOKEN}
+  
+  unity_catalog:
+    enabled: true
+    catalog_name: agents
+    schema_name: production
+    
+    tables:
+      memory:
+        name: memory
+        type: MANAGED
+        partitioned_by: ["date", "agent_id"]
+      
+      telemetry:
+        name: telemetry
+        type: MANAGED
+        partitioned_by: ["date"]
+  
+  model_serving:
+    endpoint: "databricks-dbrx-instruct"
+    always_on: true
+    min_instances: 2
+    max_instances: 10
+
+# ============================================================================
+# TELEMETRY - Full observability
+# ============================================================================
+
+telemetry:
+  otel:
+    enabled: true
+    export_to_delta: true
+    delta_table: "main.agents.telemetry"
+    batch_interval_seconds: 10
+    batch_size: 1000
+  
+  mlflow:
+    enabled: true
+    tracking_uri: "databricks"
+    experiment_name: "/agents/production/api_agent"
+    log_inputs: true
+    log_outputs: true
+    log_metrics:
+      - "response_time"
+      - "token_count"
+      - "error_rate"
+      - "cache_hit_rate"
+
+# ============================================================================
+# API CONFIGURATION
+# ============================================================================
+
+api:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 4
+  
+  cors:
+    enabled: true
+    origins: ["*"]
+  
+  rate_limiting:
+    enabled: true
+    default_limit: "100/minute"
+  
+  health_check:
+    enabled: true
+    endpoint: "/health"
+
+
+

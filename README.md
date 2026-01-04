@@ -1,287 +1,342 @@
-[![PyPI](https://img.shields.io/pypi/v/sota-agent-framework)](https://pypi.org/project/sota-agent-framework/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+# Databricks Agent Toolkit
 
-# Agent Framework
+**Unified toolkit for building production agents on Databricks**
 
-**Production-ready template for building AI agent workflows in any domain.**
-
-Build intelligent agents with memory, reasoning, optimization, and seamless Databricks integration. Start simple, scale to autonomous systems.
+Pre-wired integrations + scaffolding generators for LangGraph, LangChain, and custom agents.
 
 ---
 
-## 🚀 Quick Start
+## What This Is
 
-### Installation
+**A toolkit, not a framework.**
+
+- Use with **LangGraph**, **LangChain**, or your own agent code
+- Pre-wired integrations to **all Databricks services**
+- Best practices for **Databricks-native agents**
+- **Optional scaffolds** to generate working code
+
+Think of it like **Create React App** but for Databricks agents.
+
+---
+
+## Quick Start
+
+### Option 1: Use Integrations Directly
 
 ```bash
-# Basic (core features only)
-pip install sota-agent-framework
-
-# With features you need
-pip install sota-agent-framework[all]  # Everything
-pip install sota-agent-framework[databricks]  # Databricks integration
-pip install sota-agent-framework[optimization]  # DSPy + TextGrad
+pip install databricks-agent-toolkit
 ```
-
-### Choose Your Path
-
-**🤖 Have a Use Case? (NEW! - AI-Powered)**
-```bash
-# From text
-agent-architect "Build a fraud detection system with memory and self-improvement"
-
-# From document (txt, md, pdf, docx)
-agent-architect --file requirements.txt
-# → Instant architecture recommendation: Level, schemas, features, integrations!
-```
-Describe your use case in natural language or provide a document, get instant recommendations.
-
-**🎓 Want to Learn? (NEW!)**
-```bash
-agent-learn  # Interactive learning mode - build 5 progressively complex examples
-```
-Learn by building: chatbot → context-aware → production API → complex workflow → autonomous multi-agent
-
-**🚀 New to Agents?**
-```bash
-agent-setup  # Interactive wizard guides you through
-```
-
-**🔧 Building an Agent?**
-```bash
-agent-generate --domain "fraud_detection" --output ./my-agent
-cd my-agent && agent-advisor .  # Get recommendations
-```
-
-**⚡ Expert?**
-```bash
-# Use the framework as a library
-from agents import Agent, AgentRouter
-from memory import MemoryManager
-from orchestration import AgentWorkflowGraph
-```
-
-**📖 [See complete getting started guide →](GETTING_STARTED.md)**  
-**🎓 [See learning path →](docs/LEARNING_PATH.md)**
-
----
-
-## ✨ Key Features
-
-### Core Framework
-- ⚡ **Multiple Execution Modes** - In-process, parallel, Ray, serverless
-- 🔌 **Pluggable Architecture** - Use only what you need
-- 📝 **Type-Safe Schemas** - Pydantic models throughout
-- ⚙️ **YAML Configuration** - Infrastructure as code
-
-### Agent Intelligence
-- 🧠 **Agent-Governed Memory** - Smart storage, retrieval, reflection, forgetting
-- 🎯 **Reasoning Optimization** - Trajectory tuning, CoT distillation, self-improvement
-- 🔄 **Plan-Act-Critique Loops** - LangGraph-powered orchestration
-- 🤝 **A2A Protocol (Official)** - Linux Foundation standard for cross-framework agent communication
-- 📊 **Comprehensive Benchmarking** - 6+ metrics, regression testing
-
-### Production Ready
-- 🏢 **Databricks Native** - Unity Catalog, Delta Lake, MLflow integration
-- 📈 **Complete Observability** - OpenTelemetry, execution graphs, trace replay
-- 🔧 **Prompt Optimization** - DSPy & TextGrad for auto-tuning
-- 🌐 **REST & WebSocket APIs** - Production services included
-- 🎛️ **Experiment Tracking** - Feature flags, A/B testing, MLflow
-
-### Developer Experience
-- 🎯 **Progressive Disclosure** - Strong defaults for beginners, full control for experts
-- 🤖 **AI-Powered Tools** - `agent-architect`, `agent-setup`, `agent-generate`, `agent-advisor`, `agent-benchmark`, `agent-learn`, `agent-deploy`
-- 📚 **8 Core Docs** - Clear, concise, use-case driven
-- 🔍 **Use-Case Guidance** - Know exactly which features you need
-- 🚀 **Deployment Ready** - Docker, K8s, Databricks, Serverless templates included
-
----
-
-## 🏗️ Technology Stack
-
-Built on industry-leading technologies for production-grade AI agents:
-
-| Component | Technology | Production Config |
-|-----------|-----------|-------------------|
-| **Agent Runtime** | Databricks Apps (hot pools) | `min_instances: 2`, `scale_to_zero: false` |
-| **LLM Inference** | Databricks Model Serving | Always-on (no scale-to-zero) |
-| **Orchestration** | LangGraph + Databricks Workflows | Plan → Act → Critique loops |
-| **Agent Memory** | Lakebase + Delta Lake (UC) | Async vector + metadata queries |
-| **A2A Transport** | FastAPI/Starlette (in container) | JSON-RPC 2.0, peer-to-peer |
-| **MCP Servers** | FastAPI/Starlette (in container) | Tool/resource discovery |
-| **Telemetry** | OTEL → ZeroBus → Delta Lake | Batch writes (10s/1000 events) |
-| **Prompt Registry** | Unity Catalog Volumes | Version-controlled, auto-refresh |
-| **Prompt Optimization** | DSPy + TextGrad (offline jobs) | Scheduled (nightly), no runtime overhead |
-| **Tracing & Evaluation** | Databricks MLflow | Experiment tracking, model registry |
-| **Dashboards** | Databricks SQL | Real-time agent metrics |
-
----
-
-## 📦 Use Cases
-
-**Works for any agent workflow:**
-- 🔒 Fraud Detection & Risk Analysis
-- 💬 Customer Support & Chatbots
-- 📝 Content Moderation
-- 🏥 Healthcare & Diagnostics
-- 🔍 Data Quality & Anomaly Detection
-- 📊 Analytics & Report Generation
-- 🤖 **Your Use Case Here**
-
----
-
-## 📖 Documentation
-
-**Start Here:**
-1. **[Getting Started](GETTING_STARTED.md)** - 5-minute setup
-2. **[User Journey](docs/USER_JOURNEY.md)** - Choose your path (Beginner/Intermediate/Advanced)
-3. **[Feature Selection](docs/FEATURE_SELECTION.md)** - Which features do YOU need?
-
-**Core Guides:**
-- **[Architecture Advisor](docs/ARCHITECTURE_ADVISOR.md)** - AI-powered recommendations
-- **[Learning Path](docs/LEARNING_PATH.md)** - Learn by building (5 levels)
-- **[Integrations](docs/INTEGRATIONS.md)** - MCP, LangGraph, Databricks, A2A
-- **[Advanced Features](docs/ADVANCED_FEATURES.md)** - Memory, Reasoning, Optimization, Benchmarking
-
-**Quick Links:**
-- [Documentation Map](DOCUMENTATION_MAP.md) - Complete navigation guide
-- [Examples](examples/) - Working code examples
-- [Benchmarks](benchmarks/) - Evaluation suites
-
----
-
-## 🛠️ CLI Tools
-
-```bash
-# 🎓 Interactive learning mode (NEW!)
-agent-learn              # Learn by building 5 progressively complex examples
-agent-learn start 1      # Start Level 1: Simple Chatbot
-agent-learn start 2      # Start Level 2: Context-Aware Assistant
-
-# Interactive setup wizard (use-case based)
-agent-setup
-
-# Generate new project
-agent-generate --domain "your_domain" --output ./project
-
-# Analyze project & get recommendations
-agent-advisor ./project
-
-# Run benchmarks & evaluations
-agent-benchmark run --suite fraud_detection --report md
-
-# Deploy to production (NEW!)
-agent-deploy init --platform kubernetes  # Generate deployment configs
-agent-deploy build --tag v1.0.0          # Build Docker image
-agent-deploy status                       # Check deployment readiness
-```
-
----
-
-## 🎯 Feature Selection Guide
-
-| Use Case | Memory | Reasoning | Optimization | Monitoring | LangGraph |
-|----------|--------|-----------|--------------|------------|-----------|
-| **Simple Chatbot** | ⚪ Optional | ❌ No | ❌ No | ⚪ Optional | ❌ No |
-| **Context-Aware Agent** | ✅ Yes | ⚪ Optional | ⚪ Optional | ✅ Yes | ⚪ Optional |
-| **Production API** | ⚪ Optional | ❌ No | ⚪ Optional | ✅ Yes | ❌ No |
-| **Complex Workflows** | ✅ Yes | ✅ Yes | ⚪ Optional | ✅ Yes | ✅ Yes |
-| **Autonomous Agent** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
-
-**📖 [See detailed feature guide →](docs/FEATURE_SELECTION.md)**
-
----
-
-## 🏗️ Architecture
-
-```
-Agent Framework
-├── agents/           # Core agent classes & registry
-├── memory/           # Agent-governed memory system
-├── reasoning/        # Trajectory optimization & feedback
-├── optimization/     # DSPy & TextGrad prompt optimization
-├── orchestration/    # LangGraph workflows
-├── evaluation/       # Benchmarking & metrics
-├── visualization/    # Databricks-native observability
-├── telemetry/        # OpenTelemetry → Delta Lake
-├── uc_registry/      # Unity Catalog integration
-├── experiments/      # Feature flags & A/B testing
-├── monitoring/       # Health checks & metrics
-├── services/         # REST API & WebSocket
-└── infra/            # Terraform for Databricks
-```
-
-**📖 [See detailed architecture →](docs/USER_JOURNEY.md)**
-
----
-
-## 🚀 Example: Fraud Detection Agent
 
 ```python
-from agents import Agent, CriticalPathAgent
-from memory import MemoryManager
-from orchestration import AgentWorkflowGraph
+from databricks_agent_toolkit.integrations import DatabricksLLM
 
-# Define agent
-class FraudDetectorAgent(CriticalPathAgent):
-    async def process(self, input_data):
-        # Check memory for similar cases
-        similar = await self.memory.retrieve(
-            query=f"transaction {input_data.transaction_id}",
-            top_k=5
-        )
-        
-        # Run detection
-        result = await self.detect_fraud(input_data)
-        
-        # Store in memory
-        await self.memory.store(result, importance="HIGH")
-        
-        return result
-
-# Use with LangGraph for complex workflows
-workflow = AgentWorkflowGraph(agent_router=router)
-workflow.add_node("planner", PlannerNode())
-workflow.add_node("detector", FraudDetectorAgent())
-workflow.add_node("critic", CriticNode())
-
-result = await workflow.run(transaction_data)
+# Easy Databricks Model Serving (auto-auth, auto-trace)
+llm = DatabricksLLM(endpoint="databricks-claude-sonnet-4-5")
+response = await llm.chat([{"role": "user", "content": "Hello!"}])
+print(response["content"])
 ```
 
-**📖 [See more examples →](examples/)**
+### Option 2: Generate a Scaffold
+
+```bash
+pip install databricks-agent-toolkit
+
+# Generate chatbot (L1 - Available in v0.1.0)
+databricks-agent-toolkit generate chatbot my-bot
+
+cd my-bot
+pip install -r requirements.txt
+python app.py  # Web UI on http://localhost:8000
+```
+
+---
+
+## What's Included
+
+### **Integrations** (Pre-wired Databricks Services)
+
+```python
+from databricks_agent_toolkit.integrations import (
+    DatabricksLLM,           # Model Serving
+    DatabricksMCPTools,      # Managed MCP Servers
+    UnityAgentArtifacts,     # Unity Catalog
+    Lakebase,                # Vector search & memory
+    DatabricksAppDeployment  # Apps deployment
+)
+```
+
+- **Model Serving** - Easy LLM client with auto-tracing
+- **Unity Catalog** - Manage prompts, configs, functions
+- **Lakebase** - Vector search & agent memory
+- **Managed MCP Servers** - Vector Search, Genie, UC Functions, DBSQL
+- **Databricks Apps** - One-command deployment
+- **Workflows** - Schedule optimization jobs
+- **SQL Dashboards** - Pre-built monitoring
+
+### **Evaluation** (MLflow 3 GenAI)
+
+Located in `evaluation/`:
+- Built-in scorers (Correctness, Groundedness, Safety)
+- Custom scorers & judges
+- Automatic evaluation logging
+
+### **Optimization** (DSPy + TextGrad)
+
+Located in `optimization/`:
+- Automatic prompt optimization
+- Store optimized prompts to Unity Catalog
+- A/B testing support
+
+### **Telemetry** (Zerobus + OpenTelemetry)
+
+Located in `telemetry/`:
+- Real-time event tracking
+- Automatic Delta Lake writes
+- Pre-built dashboards
+
+### **CLI Tools**
+
+```bash
+databricks-agent-toolkit auth check        # Check authentication
+databricks-agent-toolkit generate chatbot  # Generate chatbot (L1)
+```
+
+**Scaffold Types (v0.1.0):**
+- **chatbot (L1):** Simple chatbot with web UI - ✅ Available now
+
+**Coming in Future Releases:**
+- **assistant (L2):** Context-aware with memory
+- **api (L3):** FastAPI production endpoint
+- **workflow (L4):** LangGraph workflows
+- **system (L5):** Multi-agent with A2A
+
+---
+
+## Example: LangGraph Agent with Databricks
+
+```python
+from langgraph.graph import StateGraph
+from databricks_agent_toolkit.integrations import (
+    DatabricksLLM,
+    DatabricksMCPTools,
+    UnityAgentArtifacts
+)
+
+# 1. Pre-wired Databricks services (easy!)
+llm = DatabricksLLM(endpoint="databricks-claude-sonnet-4-5")
+mcp = DatabricksMCPTools(servers={
+    "vector_search": {"catalog": "prod", "schema": "docs"}
+})
+uc = UnityAgentArtifacts(catalog="main", schema="agents")
+
+# 2. Your agent logic (standard LangGraph)
+async def my_agent(state):
+    tools = await mcp.get_tool_schemas()
+    response = await llm.chat(
+        messages=state["messages"],
+        tools=tools
+    )
+    return {"response": response}
+
+# 3. Build workflow (standard LangGraph)
+workflow = StateGraph()
+workflow.add_node("agent", my_agent)
+app = workflow.compile()
+
+# 4. Deploy (one line - coming soon)
+# from databricks_agent_toolkit.integrations import DatabricksAppDeployment
+# deployer = DatabricksAppDeployment()
+# url = deployer.deploy_agent(agent_name="my-agent", app_code_path=".")
+```
+
+---
+
+## vs. Other Frameworks
+
+| | **Databricks Agent Toolkit** | **LangGraph** | **LangChain** |
+|---|---|---|---|
+| **Purpose** | Databricks integrations | Agent framework | LLM framework |
+| **Use Together?** | YES | Primary framework | Alternative framework |
+| **Model Serving** | Pre-wired | You integrate | You integrate |
+| **Unity Catalog** | Pre-wired | You integrate | You integrate |
+| **Lakebase** | Pre-wired | You integrate | You integrate |
+| **Managed MCPs** | Pre-wired | You integrate | You integrate |
+| **MLflow 3** | Pre-wired | You integrate | You integrate |
+| **Databricks Apps** | One-command deploy | You figure out | You figure out |
+
+**Use this toolkit WITH LangGraph or LangChain, not instead of.**
+
+---
+
+## Documentation
+
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - Deployment model, Apps vs Workflows, optimization strategy
+- **[Quick Start](docs/GETTING_STARTED.md)** - Get started in 5 minutes
+- **[Integrations Guide](docs/PLATFORM_INTEGRATION.md)** - All Databricks services
+- **[Examples](examples/)** - LangGraph, LangChain, custom agents
+- **[Evaluation Guide](docs/EVALUATION_GUIDE.md)** - MLflow 3 evaluation
+- **[Optimization Guide](docs/EVALUATION_GUIDE.md#optimization)** - DSPy + TextGrad
+
+---
+
+## Learning Path
+
+| Level | Complexity | Time | What You Build | Status |
+|-------|-----------|------|----------------|--------|
+| **L1** | Simple | 2-4h | Simple chatbot (learn basics) | ✅ v0.1.0 |
+| **L2** | Basic+ | 4-8h | Context-aware assistant (add memory) | Coming soon |
+| **L3** | Intermediate | 8-16h | Production API (FastAPI + toolkit) | Coming soon |
+| **L4** | Advanced | 16-32h | Complex workflow (LangGraph + optimization) | Coming soon |
+| **L5** | Expert | 32-64h | Multi-agent system (LangGraph + A2A) | Coming soon |
+
+See `config/examples/` for configuration templates.
+
+---
+
+## Architecture
+
+### **Deployment Model**
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Databricks Apps (Real-time, Always-On)                 │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │ L1-L2: Flask Web UI (chatbot, assistant)          │ │ ← User interaction
+│  │ L3-L5: FastAPI REST API (workflows, systems)      │ │ ← API calls
+│  └────────────────────────────────────────────────────┘ │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │ Supervisory Agent (optional)                      │ │ ← Self-improvement
+│  │  - Monitors MLflow metrics in real-time          │ │
+│  │  - Triggers on-demand optimization               │ │
+│  │  - Auto-fixes performance issues                 │ │
+│  └────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+              ↕ (logs traces)        ↕ (reads/writes)
+┌─────────────────────────────────────────────────────────┐
+│  Unity Catalog + MLflow                                  │
+│  - Prompts, configs, models                             │
+│  - Evaluation metrics & traces                          │
+│  - Training datasets                                     │
+└─────────────────────────────────────────────────────────┘
+              ↕ (scheduled jobs)
+┌─────────────────────────────────────────────────────────┐
+│  Databricks Workflows (Batch/Scheduled)                  │
+│  - Nightly prompt optimization (DSPy/TextGrad)          │ ← Scheduled
+│  - Batch evaluation runs                                │
+│  - Dataset preparation                                   │
+│  - Monitoring reports                                    │
+└─────────────────────────────────────────────────────────┘
+```
+
+### **Optimization Strategy: Dual Approach**
+
+**1. Scheduled Optimization** (Databricks Workflows)
+- Runs nightly/weekly on a schedule
+- Uses accumulated traces since last run
+- Stable, predictable improvements
+- Lower compute cost (batch processing)
+
+**2. On-Demand Self-Improvement** (Supervisory Agent in Apps)
+- Monitors agent performance in real-time
+- Triggers optimization when needed:
+  - Error rate spikes
+  - User feedback drops below threshold
+  - Performance degrades
+  - Manual trigger via API
+- Faster response to issues
+- Slightly higher compute cost (always monitoring)
+
+**Both work together:** Scheduled for maintenance, on-demand for reactive fixes.
+
+### **Stack Layers**
+
+```
+Your Agent Code (LangGraph/LangChain/Custom)
+    ↓
+Databricks Agent Toolkit (Integrations Layer)
+    ↓
+Databricks Services (Model Serving, UC, Lakebase, MCP, etc.)
+```
+
+**You own:** Agent logic, workflows, business rules  
+**Toolkit provides:** Easy access to all Databricks services  
+**Databricks provides:** Infrastructure, services, deployment
+
+---
+
+## Philosophy
+
+> **"Build ON TOP OF existing platforms, not INSTEAD OF"**
+
+We don't replace LangGraph or LangChain.  
+We make Databricks services easy to use with them.
+
+---
+
+## Installation
+
+```bash
+# Minimal (just integrations)
+pip install databricks-agent-toolkit
+
+# With Databricks services
+pip install databricks-agent-toolkit[databricks]
+
+# With agent frameworks (LangGraph, LangChain)
+pip install databricks-agent-toolkit[agent-frameworks]
+
+# With optimization (DSPy, TextGrad)
+pip install databricks-agent-toolkit[optimization]
+
+# Everything
+pip install databricks-agent-toolkit[all]
+```
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! See our contribution guidelines (coming soon) or file an issue.
+We welcome contributions! This toolkit is in active development (v0.1.0).
+
+**Priority areas:**
+- Complete scaffold generation (L1-L5)
+- Enhance Unity Catalog integration
+- Add more MCP examples
+- Improve deployment automation
 
 ---
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+Apache 2.0
 
 ---
 
-## 🔗 Links
+## 🔗 Resources
 
-- **PyPI**: https://pypi.org/project/sota-agent-framework/
-- **GitHub**: https://github.com/somasekar278/universal-agent-template
-- **Documentation**: [DOCUMENTATION_MAP.md](DOCUMENTATION_MAP.md)
+- [Databricks Documentation](https://docs.databricks.com/)
+- [Databricks Managed MCP Servers](https://docs.databricks.com/generative-ai/mcp/)
+- [LangGraph](https://langchain-ai.github.io/langgraph/)
+- [MLflow 3 GenAI](https://mlflow.org/docs/latest/llms/index.html)
 
 ---
 
-## ⭐ What Makes This Agent?
+## 🎉 What's Next?
 
-Unlike orchestration-only or research-only agent frameworks, SOTA Agent ships a complete agentic development stack including autonomous planning loops, agent-governed memory, reasoning trajectory optimization, prompt auto-tuning, benchmark harnesses, and governed deployment — built for real data pipelines and production SLAs
+**v0.1.0 (Current Release):**
+- ✅ Core integrations (Model Serving, Unity Catalog, OAuth M2M auth)
+- ✅ L1 Chatbot scaffold (fully working, tested, deployed)
+- ✅ MLflow 3 evaluation system
+- ✅ Databricks Apps deployment
+- ✅ Comprehensive documentation
 
-✅ **Agent-Governed Memory** - Not just storage, intelligent decisions  
-✅ **Plan-Act-Critique Loops** - True autonomous workflows  
-✅ **Reasoning Optimization** - Learn from execution trajectories  
-✅ **Comprehensive Benchmarking** - Track performance over time  
-✅ **Databricks Native** - Production-ready from day one  
-✅ **Progressive Disclosure** - Works for beginners AND experts  
-✅ **Modular Design** - Use only what you need  
+**v0.2.0 (Next Release):**
+- L2-L5 scaffold generation (assistant, api, workflow, system)
+- Delta Lake memory backend for L2+
+- MCP server integration examples
+- DSPy/TextGrad optimization workflows
+- Video tutorials
 
-**🚀 [Get started now →](GETTING_STARTED.md)**
+---
+
+**Built with ❤️  for the Databricks agent community**

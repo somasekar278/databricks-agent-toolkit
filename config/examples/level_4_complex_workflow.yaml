@@ -1,0 +1,353 @@
+# ============================================================================
+# Level 4: Complex Workflow (16-32 hours)
+# ============================================================================
+# 
+# What this level adds:
+# - ✅ Plan → Act → Critique → Re-plan loops
+# - ✅ Multi-step reasoning
+# - ✅ LangGraph orchestration
+# - ✅ Self-improvement & feedback
+# - ✅ Prompt optimization (DSPy + TextGrad)
+# - ✅ Advanced monitoring
+# - Still single agent, but intelligent
+#
+# Use case examples:
+# - Research assistant (multi-step)
+# - Code reviewer (analyze → suggest → verify)
+# - Complex decision-making agent
+# ============================================================================
+
+environment: production
+
+# ============================================================================
+# AGENTS - Intelligent single agent with reasoning
+# ============================================================================
+
+agents:
+  workflow_agent:
+    enabled: true
+    model_endpoint: "databricks-dbrx-instruct"
+    system_prompt: "You are an intelligent agent that plans, acts, critiques, and improves iteratively."
+    max_tokens: 4000
+    temperature: 0.3  # Lower for consistency in reasoning
+    
+    # Execution configuration
+    execution:
+      mode: "async"
+      timeout: 120  # Longer for multi-step
+      max_retries: 3
+    
+    # Reasoning configuration
+    reasoning:
+      enabled: true
+      mode: "chain_of_thought"
+      max_iterations: 5
+      critique_threshold: 0.8  # Re-plan if quality < 80%
+    
+    # Memory configuration
+    memory:
+      enabled: true
+      type: "persistent"
+      backend: "delta"
+      retention_days: 90
+      
+      # Advanced memory features
+      reflection:
+        enabled: true
+        interval_hours: 24
+      
+      semantic_search:
+        enabled: true
+        embedding_model: "bge-large-en-v1.5"
+
+# ============================================================================
+# LANGGRAPH ORCHESTRATION - Plan-Act-Critique loops
+# ============================================================================
+
+orchestration:
+  langgraph:
+    enabled: true
+    
+    workflow:
+      # Plan → Act → Critique → Re-plan
+      nodes:
+        - name: "planner"
+          agent: "workflow_agent"
+          role: "Planning"
+          output: "execution_plan"
+        
+        - name: "executor"
+          agent: "workflow_agent"
+          role: "Execution"
+          input: "execution_plan"
+          output: "execution_result"
+        
+        - name: "critic"
+          agent: "workflow_agent"
+          role: "Evaluation"
+          input: "execution_result"
+          output: "critique"
+        
+        - name: "refiner"
+          agent: "workflow_agent"
+          role: "Improvement"
+          input: "critique"
+          output: "refined_plan"
+      
+      # Flow control
+      max_iterations: 5
+      success_threshold: 0.9
+      early_stopping: true
+
+# ============================================================================
+# MEMORY SYSTEM - Advanced with reflection
+# ============================================================================
+
+memory:
+  enabled: true
+  
+  storage:
+    type: "delta"
+    table: "main.agents.memory"
+    partitioned_by: ["date", "agent_id"]
+  
+  retrieval:
+    strategy: "hybrid"  # Semantic + recency
+    max_items: 10
+    similarity_threshold: 0.75
+  
+  reflection:
+    enabled: true
+    schedule: "daily"
+    summary_length: 500
+
+# ============================================================================
+# MCP SERVERS - Recommended for multi-step reasoning & research
+# ============================================================================
+# Complex workflows benefit from LLM-decided retrieval across multiple knowledge bases.
+# The LLM chooses WHEN to retrieve and FROM WHICH source.
+#
+mcp:
+  deployment_mode: "external"
+  
+  external:
+    enabled: true
+    
+    # Vector Search: Research papers & technical docs
+    vector_search_research:
+      endpoint: "https://${DATABRICKS_HOST}/api/2.0/mcp/vector-search/research/papers"
+      timeout_seconds: 30
+      retry_attempts: 3
+      auth:
+        type: "bearer_token"
+        token: "${DATABRICKS_TOKEN}"
+    
+    # Vector Search: Technical documentation
+    vector_search_docs:
+      endpoint: "https://${DATABRICKS_HOST}/api/2.0/mcp/vector-search/research/documentation"
+      timeout_seconds: 30
+      retry_attempts: 3
+      auth:
+        type: "bearer_token"
+        token: "${DATABRICKS_TOKEN}"
+    
+    # Genie: Query structured datasets
+    genie_research_data:
+      endpoint: "https://${DATABRICKS_HOST}/api/2.0/mcp/genie/${RESEARCH_GENIE_SPACE_ID}"
+      timeout_seconds: 60  # Genie queries can be slower
+      retry_attempts: 2
+      auth:
+        type: "bearer_token"
+        token: "${DATABRICKS_TOKEN}"
+    
+    # UC Functions: Custom research utilities
+    uc_functions_research:
+      endpoint: "https://${DATABRICKS_HOST}/api/2.0/mcp/functions/research/utils"
+      timeout_seconds: 30
+      auth:
+        type: "bearer_token"
+        token: "${DATABRICKS_TOKEN}"
+  
+  # Connection pooling
+  connection:
+    max_connections: 50
+    connection_timeout_seconds: 10
+  
+  # Health checks
+  monitoring:
+    enabled: true
+    health_check_interval_seconds: 60
+  
+  # Resilience
+  resilience:
+    fallback_mode: "continue_without_mcp"
+    circuit_breaker:
+      enabled: true
+      failure_threshold: 5
+      timeout_seconds: 60
+
+# ============================================================================
+# MONITORING - Advanced with on-demand optimization
+# ============================================================================
+
+monitoring:
+  deployment_mode: "embedded"
+  enabled: true
+  check_interval_seconds: 300  # Check every 5 minutes
+  
+  agents:
+    workflow_agent:
+      enabled: true
+      priority: "high"
+      
+      thresholds:
+        accuracy: 0.85
+        error_rate: 0.03
+        latency: 30.0  # 30s for complex workflows
+        plan_success_rate: 0.80  # Custom metric
+      
+      cooldown_hours: 12  # Can optimize twice daily
+      
+      notifications:
+        on_degradation:
+          - type: "slack"
+            channel: "#workflow-alerts"
+        on_optimization_complete:
+          - type: "slack"
+            channel: "#workflow-ops"
+  
+  notification_channels:
+    slack:
+      enabled: true
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+
+# ============================================================================
+# OPTIMIZATION - Turnkey DSPy + TextGrad
+# ============================================================================
+
+optimization:
+  enabled: true
+  
+  training_data:
+    delta_table: "main.agents.workflow_training"
+    holdout_table: "main.agents.workflow_holdout"
+    input_column: "input"
+    output_column: "expected_output"
+  
+  dspy:
+    enabled: true
+    method: "MIPRO"
+    num_candidates: 10
+    num_trials: 50
+    model_endpoint: "databricks-dbrx-instruct"
+  
+  textgrad:
+    enabled: true
+    learning_rate: 0.1
+    num_iterations: 20
+    batch_size: 10
+  
+  output:
+    uc_volume: "/Volumes/main/agents/prompts"
+    mlflow_experiment: "/agents/workflow_optimization"
+  
+  ab_testing:
+    enabled: true
+    traffic_split: 0.1
+
+# ============================================================================
+# DATABRICKS - Full production setup
+# ============================================================================
+
+databricks:
+  workspace:
+    host: ${DATABRICKS_HOST}
+    token: ${DATABRICKS_TOKEN}
+  
+  unity_catalog:
+    enabled: true
+    catalog_name: agents
+    schema_name: production
+    
+    volumes:
+      prompts:
+        name: prompts
+        type: MANAGED
+      
+      trajectories:
+        name: trajectories
+        type: MANAGED
+    
+    tables:
+      memory:
+        name: memory
+        type: MANAGED
+        partitioned_by: ["date", "agent_id"]
+      
+      telemetry:
+        name: telemetry
+        type: MANAGED
+        partitioned_by: ["date"]
+      
+      training_data:
+        name: workflow_training
+        type: MANAGED
+      
+      trajectories:
+        name: agent_trajectories
+        type: MANAGED
+        partitioned_by: ["date", "agent_id"]
+  
+  model_serving:
+    endpoint: "databricks-dbrx-instruct"
+    always_on: true
+    min_instances: 2
+    max_instances: 10
+
+# ============================================================================
+# TELEMETRY - Full observability
+# ============================================================================
+
+telemetry:
+  otel:
+    enabled: true
+    export_to_delta: true
+    delta_table: "main.agents.telemetry"
+    batch_interval_seconds: 10
+  
+  mlflow:
+    enabled: true
+    tracking_uri: "databricks"
+    experiment_name: "/agents/production/workflow_agent"
+    log_inputs: true
+    log_outputs: true
+    log_artifacts: true
+    log_metrics:
+      - "response_time"
+      - "planning_time"
+      - "execution_time"
+      - "critique_score"
+      - "iterations"
+      - "plan_quality"
+
+# ============================================================================
+# REASONING OPTIMIZATION
+# ============================================================================
+
+reasoning:
+  trajectory_optimization:
+    enabled: true
+    method: "textgrad"
+    save_to_delta: true
+  
+  cot_distillation:
+    enabled: true
+    teacher_model: "gpt-4"
+    student_model: "databricks-dbrx-instruct"
+  
+  feedback_loop:
+    enabled: true
+    collect_human_feedback: true
+
+
+
