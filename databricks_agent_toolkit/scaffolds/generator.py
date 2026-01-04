@@ -145,7 +145,9 @@ class ScaffoldGenerator:
                 "chatbot.py": f"{level}/chatbot.py.jinja2",  # CLI version
                 "config.yaml": f"{level}/config.yaml.jinja2",
                 "requirements.txt": f"{level}/requirements.txt.jinja2",
-                "databricks-app.yml": f"{level}/databricks-app.yml.jinja2",
+                "databricks.yml": f"{level}/databricks.yml.jinja2",  # Asset Bundle (recommended)
+                "app.yaml": f"{level}/app.yaml.jinja2",  # App config for bundle
+                "databricks-app.yml": f"{level}/databricks-app.yml.jinja2",  # Legacy
                 "README.md": f"{level}/README.md.jinja2",
             },
             "assistant": {
@@ -155,7 +157,9 @@ class ScaffoldGenerator:
                 "rag_manager.py": f"{level}/rag_manager.py.jinja2",
                 "config.yaml": f"{level}/config.yaml.jinja2",
                 "requirements.txt": f"{level}/requirements.txt.jinja2",
-                "databricks-app.yml": f"{level}/databricks-app.yml.jinja2",
+                "databricks.yml": f"{level}/databricks.yml.jinja2",  # Asset Bundle (recommended)
+                "app.yaml": f"{level}/app.yaml.jinja2",  # App config for bundle
+                "databricks-app.yml": f"{level}/databricks-app.yml.jinja2",  # Legacy
                 "README.md": f"{level}/README.md.jinja2",
             }
             # More scaffold types coming in future releases:
