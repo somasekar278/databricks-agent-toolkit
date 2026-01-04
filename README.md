@@ -1,5 +1,7 @@
 # Databricks Agent Toolkit
 
+[![PyPI version](https://badge.fury.io/py/databricks-agent-toolkit.svg)](https://pypi.org/project/databricks-agent-toolkit/)
+
 **Unified toolkit for building production agents on Databricks**
 
 Pre-wired integrations + scaffolding generators for LangGraph, LangChain, and custom agents.
