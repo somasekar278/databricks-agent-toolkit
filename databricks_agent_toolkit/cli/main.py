@@ -20,7 +20,7 @@ def print_banner():
     print("""
     ╔═══════════════════════════════════════════════════════════╗
     ║                                                           ║
-    ║       Databricks Agent Toolkit v0.1.0                    ║
+    ║       Databricks Agent Toolkit v0.1.2                    ║
     ║                                                           ║
     ║       Pre-wired Databricks integrations for              ║
     ║       building production agents                          ║
@@ -56,7 +56,7 @@ For more info: https://github.com/databricks/databricks-agent-toolkit
     parser.add_argument(
         "--version",
         action="version",
-        version="databricks-agent-toolkit 0.1.0"
+        version="databricks-agent-toolkit 0.1.2"
     )
     
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
