@@ -7,7 +7,7 @@ Validates generated scaffolds to ensure all required features are present.
 import os
 import re
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Optional, Any
 
 
 class ScaffoldValidator:
@@ -34,15 +34,19 @@ class ScaffoldValidator:
         self.errors = []
         self.warnings = []
     
-    def validate(self) -> Tuple[bool, List[str], List[str]]:
+    def validate(self, cli_options: Optional[Dict[str, Any]] = None) -> Tuple[bool, List[str], List[str]]:
         """
         Run all validation checks.
+        
+        Args:
+            cli_options: Optional CLI options used to generate the scaffold (for validation)
         
         Returns:
             Tuple of (is_valid, errors, warnings)
         """
         self.errors = []
         self.warnings = []
+        self.cli_options = cli_options or {}
         
         # Required file checks
         self._check_required_files()
@@ -57,6 +61,10 @@ class ScaffoldValidator:
         self._validate_config()
         self._validate_dependencies()
         self._validate_mlflow_integration()
+        
+        # CLI-to-config validation (if CLI options provided)
+        if self.cli_options:
+            self._validate_cli_to_config_mapping()
         
         is_valid = len(self.errors) == 0
         return is_valid, self.errors, self.warnings
@@ -241,6 +249,89 @@ class ScaffoldValidator:
         if missing:
             self.warnings.append(f"{error_msg} (missing: {', '.join(missing)})")
     
+    def _validate_cli_to_config_mapping(self):
+        """
+        Validate that CLI options are properly reflected in generated config.
+        
+        This catches issues where:
+        - CLI options aren't passed to templates
+        - Templates don't use Jinja2 variables correctly
+        - Generated config doesn't match CLI intent
+        """
+        config_path = self.path / "config.yaml"
+        
+        if not config_path.exists():
+            return
+        
+        import yaml
+        try:
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
+        except Exception as e:
+            self.warnings.append(f"Could not parse config.yaml for CLI validation: {e}")
+            return
+        
+        # Validate RAG options (L2+)
+        if self.type == "assistant":
+            # Check enable_rag
+            if self.cli_options.get("enable_rag"):
+                rag_enabled = config.get("rag", {}).get("enabled", False)
+                if not rag_enabled:
+                    self.errors.append(
+                        "CLI: --enable-rag specified, but config.yaml has rag.enabled: false. "
+                        "Template may not be using {{enable_rag}} variable correctly."
+                    )
+            
+            # Check rag_source
+            if self.cli_options.get("rag_source"):
+                config_source = config.get("rag", {}).get("source")
+                cli_source = self.cli_options.get("rag_source")
+                if config_source != cli_source and config_source == 'null':
+                    self.errors.append(
+                        f"CLI: --rag-source={cli_source}, but config.yaml has source: null. "
+                        "Template may not be using {{rag_source}} variable correctly."
+                    )
+            
+            # Check rag_backend
+            if self.cli_options.get("rag_backend"):
+                config_backend = config.get("rag", {}).get("backend", "pgvector")
+                cli_backend = self.cli_options.get("rag_backend")
+                if config_backend != cli_backend:
+                    self.errors.append(
+                        f"CLI: --rag-backend={cli_backend}, but config.yaml has backend: {config_backend}. "
+                        "Template may not be using {{rag_backend}} variable correctly."
+                    )
+            
+            # Check index_type
+            if self.cli_options.get("index_type"):
+                config_index = config.get("rag", {}).get("index_type", "ivfflat")
+                cli_index = self.cli_options.get("index_type")
+                if config_index != cli_index:
+                    self.warnings.append(
+                        f"CLI: --index-type={cli_index}, but config.yaml has index_type: {config_index}. "
+                        "Verify template is using {{index_type}} variable correctly."
+                    )
+            
+            # Check vector_search_index
+            if self.cli_options.get("vector_search_index"):
+                config_vs_index = config.get("rag", {}).get("index_name")
+                cli_vs_index = self.cli_options.get("vector_search_index")
+                if config_vs_index != cli_vs_index and config_vs_index == 'null':
+                    self.errors.append(
+                        f"CLI: --vector-search-index={cli_vs_index}, but config.yaml has index_name: null. "
+                        "Template may not be using {{vector_search_index}} variable correctly."
+                    )
+        
+        # Validate model option (all levels)
+        if self.cli_options.get("model"):
+            config_model = config.get("model", {}).get("endpoint")
+            cli_model = self.cli_options.get("model")
+            if config_model != cli_model:
+                self.warnings.append(
+                    f"CLI: --model={cli_model}, but config.yaml has endpoint: {config_model}. "
+                    "Verify template is using {{model}} variable correctly."
+                )
+    
     def print_report(self):
         """Print validation report"""
         print(f"\n{'='*60}")
@@ -263,19 +354,20 @@ class ScaffoldValidator:
         print(f"{'='*60}\n")
 
 
-def validate_scaffold(scaffold_path: str, scaffold_type: str) -> bool:
+def validate_scaffold(scaffold_path: str, scaffold_type: str, cli_options: Optional[Dict[str, Any]] = None) -> bool:
     """
     Validate a generated scaffold.
     
     Args:
         scaffold_path: Path to scaffold directory
         scaffold_type: Type of scaffold (chatbot, assistant, etc.)
+        cli_options: Optional CLI options used to generate the scaffold
     
     Returns:
         True if valid, False otherwise
     """
     validator = ScaffoldValidator(scaffold_path, scaffold_type)
-    is_valid, errors, warnings = validator.validate()
+    is_valid, errors, warnings = validator.validate(cli_options=cli_options)
     validator.print_report()
     return is_valid
 

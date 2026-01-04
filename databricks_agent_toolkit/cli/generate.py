@@ -19,8 +19,22 @@ Examples:
   # Simple chatbot
   databricks-agent-toolkit generate chatbot hello-bot
   
-  # Context-aware assistant with memory
-  databricks-agent-toolkit generate assistant support-assistant --enable-memory
+  # Assistant with memory only (no RAG)
+  databricks-agent-toolkit generate assistant support-assistant
+  
+  # Assistant with memory + RAG (pgvector)
+  databricks-agent-toolkit generate assistant doc-assistant \\
+    --enable-rag \\
+    --rag-source /Volumes/main/default/docs \\
+    --index-type ivfflat
+  
+  # Assistant with memory + RAG (Vector Search)
+  databricks-agent-toolkit generate assistant enterprise-assistant \\
+    --enable-rag \\
+    --rag-backend vector_search \\
+    --rag-source /Volumes/main/default/docs \\
+    --vector-search-endpoint my-endpoint \\
+    --vector-search-index main.default.docs_index
   
   # Production API with MCP
   databricks-agent-toolkit generate api customer-support --enable-mcp
@@ -83,6 +97,37 @@ For more info: https://databricks-agent-toolkit.readthedocs.io
         help="Enable A2A protocol (system)"
     )
     
+    # RAG configuration (L2+)
+    parser.add_argument(
+        "--enable-rag",
+        action="store_true",
+        help="Enable RAG for knowledge retrieval (assistant+)"
+    )
+    parser.add_argument(
+        "--rag-backend",
+        choices=["pgvector", "vector_search"],
+        default="pgvector",
+        help="RAG backend (default: pgvector)"
+    )
+    parser.add_argument(
+        "--rag-source",
+        help="UC Volume path for documents (e.g., /Volumes/main/default/docs)"
+    )
+    parser.add_argument(
+        "--index-type",
+        choices=["ivfflat", "hnsw"],
+        default="ivfflat",
+        help="pgvector index type: ivfflat (fast) or hnsw (accurate)"
+    )
+    parser.add_argument(
+        "--vector-search-endpoint",
+        help="Vector Search endpoint name (for vector_search backend)"
+    )
+    parser.add_argument(
+        "--vector-search-index",
+        help="Vector Search index name (e.g., main.default.docs_index)"
+    )
+    
     # Workflow-specific
     parser.add_argument(
         "--workflow",
@@ -128,6 +173,13 @@ For more info: https://databricks-agent-toolkit.readthedocs.io
         "enable_a2a": args.enable_a2a,
         "workflow": args.workflow,
         "agents": agents or ["agent_a", "agent_b"],
+        # RAG options (L2+)
+        "enable_rag": args.enable_rag if hasattr(args, 'enable_rag') else False,
+        "rag_backend": args.rag_backend if hasattr(args, 'rag_backend') else "pgvector",
+        "rag_source": args.rag_source if hasattr(args, 'rag_source') else None,
+        "index_type": args.index_type if hasattr(args, 'index_type') else "ivfflat",
+        "vector_search_endpoint": args.vector_search_endpoint if hasattr(args, 'vector_search_endpoint') else None,
+        "vector_search_index": args.vector_search_index if hasattr(args, 'vector_search_index') else None,
     }
     
     # Generate scaffold
