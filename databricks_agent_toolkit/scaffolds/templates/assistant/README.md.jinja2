@@ -354,41 +354,47 @@ rag:
 
 ## Deploy to Databricks Apps
 
-### 1. Set Up Service Principal
+### **Recommended: Using Asset Bundles**
+
+**1. Configure Lakebase credentials**
+
+Edit `databricks.yml` or set variables:
+```bash
+export TF_VAR_lakebase_host="your-instance.cloud.databricks.com"
+export TF_VAR_lakebase_database="agents"
+export TF_VAR_lakebase_user="your-user"
+export TF_VAR_lakebase_password="your-password"
+```
+
+**2. Deploy with bundle**
+```bash
+databricks bundle deploy
+```
+
+**3. Add permissions** (in Databricks UI):
+1. Go to **Apps** → **{{ name }}**
+2. **Resources** → **Add Resource**
+3. Add **Model Serving** with **Can query** permission
+
+**4. Access your app**
+```
+https://your-workspace.cloud.databricks.com/ml/apps/{{ name }}
+```
+
+---
+
+### **Alternative: Direct Deployment**
 
 ```bash
+# Set credentials
 export DATABRICKS_CLIENT_ID="your-sp-client-id"
 export DATABRICKS_CLIENT_SECRET="your-sp-client-secret"
-```
 
-### 2. Configure Lakebase in `databricks-app.yml`
-
-```yaml
-env:
-  - name: LAKEBASE_HOST
-    value: "your-instance.lakebase.databricks.com"
-  - name: LAKEBASE_DATABASE
-    value: "agents"
-  - name: LAKEBASE_USER
-    value: "your-user"
-  - name: LAKEBASE_PASSWORD
-    value: "your-password"  # Use secrets in production!
-```
-
-### 3. Deploy
-
-```bash
+# Deploy
 databricks apps deploy {{ name }} \
     --source-code-path . \
     --app-config-file databricks-app.yml
 ```
-
-### 4. Add Permissions
-
-In Databricks UI:
-1. Go to **Apps** → **{{ name }}**
-2. **Resources** → **Add Resource**
-3. Add **Model Serving** with **Can query** permission
 
 ---
 

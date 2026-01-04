@@ -1,0 +1,57 @@
+bundle:
+  name: {{ name }}
+
+sync:
+  include:
+    - "*.py"
+    - "*.yaml"
+    - "*.yml"
+    - "*.txt"
+    - "*.md"
+
+resources:
+  apps:
+    {{ name }}:
+      name: {{ name }}
+      description: "{{ name }} - Context-Aware Assistant (L2)"
+      source_code_path: .
+      compute_size: LARGE
+      resources:
+        - name: model_serving
+          description: "Access to Model Serving endpoints"
+          serving_endpoint:
+            name: "*"
+            permission: CAN_QUERY
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Workspace/{{ '${workspace.current_user.userName}' }}/.bundle/{{ '${bundle.name}' }}/{{ '${bundle.target}' }}
+  
+  prod:
+    mode: production
+    workspace:
+      root_path: /Workspace/{{ '${workspace.current_user.userName}' }}/.bundle/{{ '${bundle.name}' }}/{{ '${bundle.target}' }}
+    permissions:
+      - user_name: "{{ '${workspace.current_user.userName}' }}"
+        level: CAN_MANAGE
+
+variables:
+  lakebase_host:
+    description: "Lakebase PostgreSQL host"
+    default: ""
+  
+  lakebase_database:
+    description: "Lakebase database name"
+    default: "agents"
+  
+  lakebase_user:
+    description: "Lakebase username"
+    default: ""
+  
+  lakebase_password:
+    description: "Lakebase password"
+    default: ""
+
