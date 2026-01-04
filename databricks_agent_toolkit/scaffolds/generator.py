@@ -97,6 +97,13 @@ class ScaffoldGenerator:
             "workflow": options.get("workflow", "plan-act-critique"),
             "agents": options.get("agents", ["agent_a", "agent_b"]),
             "enable_a2a": options.get("enable_a2a", False),
+            # RAG options (L2+)
+            "enable_rag": options.get("enable_rag", False),
+            "rag_backend": options.get("rag_backend", "pgvector"),
+            "rag_source": options.get("rag_source", None),
+            "index_type": options.get("index_type", "ivfflat"),
+            "vector_search_endpoint": options.get("vector_search_endpoint", "one-env-shared-endpoint-0"),
+            "vector_search_index": options.get("vector_search_index", None),
         }
         
         # Generate files based on level
@@ -115,7 +122,7 @@ class ScaffoldGenerator:
         try:
             from databricks_agent_toolkit.scaffolds.validator import validate_scaffold
             logger.info(f"\n🔍 Validating generated scaffold...")
-            is_valid = validate_scaffold(str(output_path), level)
+            is_valid = validate_scaffold(str(output_path), level, cli_options=options)
             if not is_valid:
                 logger.warning("   ⚠️  Validation found issues. Please review above.")
         except Exception as e:

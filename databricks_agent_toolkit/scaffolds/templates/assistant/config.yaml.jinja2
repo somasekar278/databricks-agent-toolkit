@@ -26,15 +26,15 @@ memory:
 
 # RAG Configuration (Optional - for knowledge retrieval)
 rag:
-  enabled: false  # Set to true to enable RAG
+  enabled: {{ enable_rag | default(false) | lower }}  # Set to true to enable RAG
   
   # Document source (UC Volume path or local path for testing)
   # UC Volume example: /Volumes/main/default/agent_docs
   # Local path example: /path/to/docs
-  source: null
+  source: {{ rag_source | default('null') if rag_source else 'null' }}
   
   # Backend: pgvector (default, cost-effective) or vector_search (enterprise-scale)
-  backend: pgvector
+  backend: {{ rag_backend | default('pgvector') }}
   
   # Retrieval settings
   top_k: 5  # Number of documents to retrieve
@@ -45,11 +45,11 @@ rag:
   
   # pgvector index type (only for pgvector backend)
   # Options: ivfflat (faster indexing, good for updates) or hnsw (better recall, read-heavy)
-  index_type: ivfflat  # Default: ivfflat
+  index_type: {{ index_type | default('ivfflat') }}  # Default: ivfflat
   
   # Vector Search config (only if backend: vector_search)
-  vector_search_endpoint: one-env-shared-endpoint-0  # Your Vector Search endpoint name
-  index_name: null  # e.g., main.default.docs_index (catalog.schema.index_name)
+  vector_search_endpoint: {{ vector_search_endpoint | default('one-env-shared-endpoint-0') }}  # Your Vector Search endpoint name
+  index_name: {{ vector_search_index | default('null') if vector_search_index else 'null' }}  # e.g., main.default.docs_index (catalog.schema.index_name)
 
 # MLflow Configuration
 mlflow:
