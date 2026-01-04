@@ -1,241 +1,321 @@
 """
-Lakebase Client - Thin Wrapper for Databricks Vector Search
+Lakebase - Databricks Managed PostgreSQL Integration
 
-This is a convenience wrapper around Databricks SDK's vector search APIs.
-All actual vector operations happen in Lakebase (Databricks native).
+Lakebase is Databricks' fully managed PostgreSQL offering, perfect for:
+- Conversational memory (chat history, sessions)
+- Structured agent data (configurations, user profiles)
+- OLTP workloads
+- pgvector for embeddings (if needed)
 
-For advanced usage, use the Databricks SDK directly:
-https://databricks-sdk-py.readthedocs.io/en/latest/workspace/vector_search_indexes.html
+For large-scale RAG/vector search, use DatabricksVectorSearch (Delta Lake-based) instead.
+
+Documentation: https://docs.databricks.com/lakebase/
 """
 
 from typing import List, Dict, Any, Optional
-from databricks.sdk import WorkspaceClient
 import os
 
-# Try to import VectorIndexType, but make it optional for older SDK versions
 try:
-    from databricks.sdk.service.catalog import VectorIndexType
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    PSYCOPG2_AVAILABLE = True
 except ImportError:
-    VectorIndexType = None  # Will be checked at runtime if needed
+    PSYCOPG2_AVAILABLE = False
+    psycopg2 = None
+    RealDictCursor = None
 
 
 class Lakebase:
     """
-    Thin wrapper around Databricks Lakebase (Vector Search).
+    Client for Databricks Lakebase (Managed PostgreSQL).
     
-    This is NOT a custom vector store - it just provides convenience
-    methods for common operations. All storage and search happens in Lakebase.
+    Perfect for agent memory, sessions, and structured data.
     
     Example:
         ```python
-        from memory import LakebaseClient
+        from databricks_agent_toolkit.integrations import Lakebase
         
-        client = LakebaseClient()
-        
-        # Create index (one-time setup)
-        client.create_index(
-            name="main.agents.knowledge_base",
-            source_table="main.agents.documents",
-            embedding_column="content"
+        # Initialize
+        lakebase = Lakebase(
+            host="your-lakebase.cloud.databricks.com",
+            database="agents",
+            user="REDACTED",
+            password="REDACTED"
         )
         
-        # Search
-        results = client.search(
-            index_name="main.agents.knowledge_base",
-            query="What is machine learning?",
-            num_results=5
+        # Store conversation
+        lakebase.execute(
+            \"\"\"
+            INSERT INTO conversations (session_id, role, content, timestamp)
+            VALUES (%s, %s, %s, NOW())
+            \"\"\",
+            ("session_123", "user", "Hello!")
         )
+        
+        # Retrieve conversation history
+        history = lakebase.query(
+            \"\"\"
+            SELECT role, content, timestamp 
+            FROM conversations 
+            WHERE session_id = %s 
+            ORDER BY timestamp
+            \"\"\",
+            ("session_123",)
+        )
+        ```
+    
+    For pgvector integration:
+        ```python
+        # Enable pgvector extension (one-time)
+        lakebase.execute("CREATE EXTENSION IF NOT EXISTS vector")
+        
+        # Create table with vector column
+        lakebase.execute(\"\"\"
+            CREATE TABLE embeddings (
+                id SERIAL PRIMARY KEY,
+                content TEXT,
+                embedding vector(1536)
+            )
+        \"\"\")
+        
+        # Vector similarity search
+        results = lakebase.query(\"\"\"
+            SELECT content, embedding <-> %s AS distance
+            FROM embeddings
+            ORDER BY distance
+            LIMIT 5
+        \"\"\", (query_embedding,))
         ```
     """
     
     def __init__(
         self,
         host: Optional[str] = None,
-        token: Optional[str] = None
+        database: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        port: int = 5432
     ):
         """
-        Initialize Lakebase client.
+        Initialize Lakebase (PostgreSQL) connection.
         
         Args:
-            host: Databricks workspace URL (defaults to DATABRICKS_HOST env var)
-            token: Databricks token (defaults to DATABRICKS_TOKEN env var)
-        """
-        self.client = WorkspaceClient(
-            host=host or os.getenv("DATABRICKS_HOST"),
-            token=token or os.getenv("DATABRICKS_TOKEN")
-        )
-    
-    def create_index(
-        self,
-        name: str,
-        source_table: str,
-        embedding_column: str,
-        endpoint_name: str = "default_vector_endpoint",
-        primary_key: str = "id",
-        embedding_model: str = "databricks-bge-large-en"
-    ) -> Dict[str, Any]:
-        """
-        Create a vector search index in Lakebase.
+            host: Lakebase host (env: LAKEBASE_HOST)
+            database: Database name (env: LAKEBASE_DATABASE)
+            user: Username (env: LAKEBASE_USER)
+            password: Password (env: LAKEBASE_PASSWORD)
+            port: Port (default: 5432)
         
-        This is a one-time setup operation. The index will automatically
-        sync with the source Delta table.
-        
-        Args:
-            name: Full name of index (e.g., "main.agents.knowledge_base")
-            source_table: Full name of source Delta table
-            embedding_column: Column to embed
-            endpoint_name: Vector search endpoint name
-            primary_key: Primary key column
-            embedding_model: Databricks embedding model endpoint
-            
-        Returns:
-            Index creation response
+        Raises:
+            ImportError: If psycopg2 is not installed
         """
-        try:
-            result = self.client.vector_search_indexes.create_index(
-                name=name,
-                endpoint_name=endpoint_name,
-                primary_key=primary_key,
-                index_type=VectorIndexType.DELTA_SYNC,
-                delta_sync_index_spec={
-                    "source_table": source_table,
-                    "embedding_source_columns": [
-                        {
-                            "name": embedding_column,
-                            "embedding_model_endpoint_name": embedding_model
-                        }
-                    ]
-                }
+        if not PSYCOPG2_AVAILABLE:
+            raise ImportError(
+                "psycopg2 is required for Lakebase integration. "
+                "Install with: pip install psycopg2-binary"
             )
-            print(f"✅ Created Lakebase index: {name}")
-            return result
-        except Exception as e:
-            print(f"❌ Failed to create index: {e}")
-            raise
+        
+        self.host = host or os.getenv("LAKEBASE_HOST")
+        self.database = database or os.getenv("LAKEBASE_DATABASE")
+        self.user = user or os.getenv("LAKEBASE_USER")
+        self.password = password or os.getenv("LAKEBASE_PASSWORD")
+        self.port = port
+        
+        if not all([self.host, self.database, self.user, self.password]):
+            raise ValueError(
+                "Missing Lakebase credentials. Provide via arguments or environment variables:\n"
+                "LAKEBASE_HOST, LAKEBASE_DATABASE, LAKEBASE_USER, LAKEBASE_PASSWORD"
+            )
+        
+        self.connection = None
     
-    def search(
+    def connect(self):
+        """Establish connection to Lakebase."""
+        if self.connection is None or self.connection.closed:
+            self.connection = psycopg2.connect(
+                host=self.host,
+                database=self.database,
+                user=self.user,
+                password=self.password,
+                port=self.port
+            )
+            print(f"✅ Connected to Lakebase: {self.host}/{self.database}")
+    
+    def close(self):
+        """Close connection to Lakebase."""
+        if self.connection and not self.connection.closed:
+            self.connection.close()
+            print("✅ Closed Lakebase connection")
+    
+    def execute(self, query: str, params: Optional[tuple] = None) -> int:
+        """
+        Execute a SQL command (INSERT, UPDATE, DELETE, CREATE, etc.).
+        
+        Args:
+            query: SQL query
+            params: Query parameters (for parameterized queries)
+        
+        Returns:
+            Number of rows affected
+        """
+        self.connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(query, params)
+            self.connection.commit()
+            return cursor.rowcount
+    
+    def query(
         self,
-        index_name: str,
         query: str,
-        num_results: int = 10,
-        filters: Optional[Dict[str, Any]] = None
+        params: Optional[tuple] = None,
+        fetch_one: bool = False
     ) -> List[Dict[str, Any]]:
         """
-        Search vectors in Lakebase.
+        Execute a SELECT query and return results.
         
         Args:
-            index_name: Full name of index
-            query: Query text (will be embedded automatically)
-            num_results: Number of results to return
-            filters: Optional filters (e.g., {"agent_id": "fraud_detector"})
-            
+            query: SQL SELECT query
+            params: Query parameters
+            fetch_one: If True, return only first result
+        
         Returns:
-            List of search results with scores
+            List of result dictionaries (or single dict if fetch_one=True)
         """
-        try:
-            result = self.client.vector_search_indexes.query_index(
-                index_name=index_name,
-                query_text=query,
-                num_results=num_results,
-                filters=filters
+        self.connect()
+        with self.connection.cursor(cursor_factory=RealDictCursor) as cursor:
+            cursor.execute(query, params)
+            if fetch_one:
+                result = cursor.fetchone()
+                return dict(result) if result else None
+            return [dict(row) for row in cursor.fetchall()]
+    
+    def create_conversations_table(self):
+        """
+        Create a standard conversations table for agent memory.
+        
+        Schema:
+        - session_id: Unique identifier for conversation session
+        - role: "user" or "assistant"
+        - content: Message content
+        - timestamp: When message was sent
+        - metadata: Additional data (JSONB)
+        """
+        self.execute("""
+            CREATE TABLE IF NOT EXISTS conversations (
+                id SERIAL PRIMARY KEY,
+                session_id VARCHAR(255) NOT NULL,
+                role VARCHAR(50) NOT NULL,
+                content TEXT NOT NULL,
+                timestamp TIMESTAMP DEFAULT NOW(),
+                metadata JSONB,
+                INDEX idx_session (session_id),
+                INDEX idx_timestamp (timestamp)
             )
-            
-            # Convert to simple dict format
-            results = []
-            if result.manifest and result.manifest.columns:
-                for col in result.manifest.columns:
-                    results.append({
-                        "score": col.score if hasattr(col, 'score') else None,
-                        "content": col.content if hasattr(col, 'content') else None,
-                        "metadata": col.metadata if hasattr(col, 'metadata') else {}
-                    })
-            
-            return results
-        except Exception as e:
-            print(f"❌ Search failed: {e}")
-            raise
+        """)
+        print("✅ Created conversations table")
     
-    def delete_index(self, index_name: str) -> None:
+    def store_message(
+        self,
+        session_id: str,
+        role: str,
+        content: str,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
         """
-        Delete a vector search index.
+        Store a conversation message.
         
         Args:
-            index_name: Full name of index to delete
+            session_id: Session identifier
+            role: "user" or "assistant"
+            content: Message content
+            metadata: Optional metadata
         """
-        try:
-            self.client.vector_search_indexes.delete_index(index_name=index_name)
-            print(f"✅ Deleted index: {index_name}")
-        except Exception as e:
-            print(f"❌ Failed to delete index: {e}")
-            raise
+        import json
+        self.execute(
+            """
+            INSERT INTO conversations (session_id, role, content, metadata)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (session_id, role, content, json.dumps(metadata) if metadata else None)
+        )
     
-    def list_indexes(self, endpoint_name: str = "default_vector_endpoint") -> List[str]:
+    def get_conversation_history(
+        self,
+        session_id: str,
+        limit: Optional[int] = None
+    ) -> List[Dict[str, Any]]:
         """
-        List all vector search indexes on an endpoint.
+        Retrieve conversation history for a session.
         
         Args:
-            endpoint_name: Vector search endpoint name
-            
+            session_id: Session identifier
+            limit: Maximum number of messages to return (most recent)
+        
         Returns:
-            List of index names
+            List of messages with role, content, timestamp, metadata
         """
-        try:
-            indexes = self.client.vector_search_indexes.list_indexes(
-                endpoint_name=endpoint_name
-            )
-            return [idx.name for idx in indexes]
-        except Exception as e:
-            print(f"❌ Failed to list indexes: {e}")
-            raise
-    
-    def get_index_status(self, index_name: str) -> Dict[str, Any]:
+        query = """
+            SELECT role, content, timestamp, metadata
+            FROM conversations
+            WHERE session_id = %s
+            ORDER BY timestamp DESC
         """
-        Get status of a vector search index.
         
-        Args:
-            index_name: Full name of index
-            
-        Returns:
-            Index status information
+        if limit:
+            query += f" LIMIT {limit}"
+        
+        results = self.query(query, (session_id,))
+        return list(reversed(results))  # Return chronological order
+    
+    def clear_conversation(self, session_id: str):
+        """Delete all messages for a session."""
+        self.execute(
+            "DELETE FROM conversations WHERE session_id = %s",
+            (session_id,)
+        )
+        print(f"✅ Cleared conversation: {session_id}")
+    
+    def enable_pgvector(self):
         """
-        try:
-            index = self.client.vector_search_indexes.get_index(index_name=index_name)
-            return {
-                "name": index.name,
-                "status": index.status,
-                "index_type": index.index_type,
-                "endpoint_name": index.endpoint_name
-            }
-        except Exception as e:
-            print(f"❌ Failed to get index status: {e}")
-            raise
+        Enable pgvector extension for vector operations.
+        
+        Run this once to enable vector similarity search.
+        """
+        self.execute("CREATE EXTENSION IF NOT EXISTS vector")
+        print("✅ Enabled pgvector extension")
+    
+    def __enter__(self):
+        """Context manager entry."""
+        self.connect()
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.close()
 
 
 # ============================================================================
-# For Advanced Usage: Use Databricks SDK Directly
+# Helper Functions
 # ============================================================================
 
-def get_native_client() -> WorkspaceClient:
+def get_lakebase_connection_string(
+    host: Optional[str] = None,
+    database: Optional[str] = None,
+    user: Optional[str] = None,
+    password: Optional[str] = None,
+    port: int = 5432
+) -> str:
     """
-    Get the native Databricks SDK client for advanced operations.
+    Generate PostgreSQL connection string for Lakebase.
     
-    For full API reference, see:
-    https://databricks-sdk-py.readthedocs.io/en/latest/workspace/vector_search_indexes.html
+    Useful for SQLAlchemy, Django, or other ORMs.
     
-    Example:
-        ```python
-        from memory import get_native_client
-        
-        client = get_native_client()
-        
-        # Use full SDK capabilities
-        indexes = client.vector_search_indexes.list_indexes(endpoint_name="my_endpoint")
-        for idx in indexes:
-            print(f"Index: {idx.name}, Status: {idx.status}")
-        ```
+    Returns:
+        Connection string in format: postgresql://user:pass@host:port/db
     """
-    return WorkspaceClient(
-        host=os.getenv("DATABRICKS_HOST"),
-        token=os.getenv("DATABRICKS_TOKEN")
-    )
-
+    host = host or os.getenv("LAKEBASE_HOST")
+    database = database or os.getenv("LAKEBASE_DATABASE")
+    user = user or os.getenv("LAKEBASE_USER")
+    password = password or os.getenv("LAKEBASE_PASSWORD")
+    
+    return f"postgresql://{user}:{password}@{host}:{port}/{database}"

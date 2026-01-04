@@ -53,6 +53,22 @@ python app.py  # Web UI on http://localhost:8000
 
 ## What's Included
 
+### **Storage & Memory: Choose the Right Tool**
+
+**Lakebase (PostgreSQL)** - Use for:
+- Conversational memory (chat history, sessions)
+- Structured agent data (user profiles, configurations)
+- OLTP workloads (fast reads/writes)
+- pgvector for small-scale embeddings
+
+**DatabricksVectorSearch (Delta Lake)** - Use for:
+- Large-scale RAG (millions of documents)
+- Knowledge bases synced from Delta tables
+- Semantic search across data lake
+- Auto-embedding with Databricks models
+
+**Both work together!** L2+ agents typically use Lakebase for conversations and Vector Search for knowledge retrieval.
+
 ### **Integrations** (Pre-wired Databricks Services)
 
 ```python
@@ -60,14 +76,16 @@ from databricks_agent_toolkit.integrations import (
     DatabricksLLM,           # Model Serving
     DatabricksMCPTools,      # Managed MCP Servers
     UnityAgentArtifacts,     # Unity Catalog
-    Lakebase,                # Vector search & memory
+    Lakebase,                # Managed PostgreSQL (conversations, memory)
+    DatabricksVectorSearch,  # Delta Lake vector search (RAG, knowledge bases)
     DatabricksAppDeployment  # Apps deployment
 )
 ```
 
-- **Model Serving** - Easy LLM client with auto-tracing
+- **Model Serving** - Easy LLM client with OAuth M2M auth
 - **Unity Catalog** - Manage prompts, configs, functions
-- **Lakebase** - Vector search & agent memory
+- **Lakebase** - Managed PostgreSQL for conversational memory & structured data
+- **DatabricksVectorSearch** - Delta Lake-based vector search for large-scale RAG
 - **Managed MCP Servers** - Vector Search, Genie, UC Functions, DBSQL
 - **Databricks Apps** - One-command deployment
 - **Workflows** - Schedule optimization jobs
