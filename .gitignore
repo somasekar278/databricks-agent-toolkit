@@ -71,3 +71,16 @@ logs/
 
 # OS
 Thumbs.db
+
+# IDE workspace files
+*.code-workspace
+
+# Old/deprecated files
+requirements.txt
+requirements-test.txt
+
+# MCP server logs
+mcp-servers/*.log
+
+# Cleanup plans
+CLEANUP_*.md

@@ -1,0 +1,215 @@
+"""
+Scaffold Generator
+
+Generates L1-L5 agent scaffolds from Jinja2 templates.
+"""
+
+import os
+import shutil
+from pathlib import Path
+from typing import Dict, Any, Optional
+from jinja2 import Environment, FileSystemLoader
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class ScaffoldGenerator:
+    """
+    Generate agent scaffolds from templates.
+    
+    Example:
+        generator = ScaffoldGenerator()
+        generator.generate(
+            level="l3",
+            name="customer-support",
+            output_dir="./customer-support",
+            options={
+                "model": "databricks-claude-sonnet-4-5",
+                "enable_mcp": True
+            }
+        )
+    """
+    
+    def __init__(self):
+        """Initialize scaffold generator."""
+        self.templates_dir = Path(__file__).parent / "templates"
+        
+        # Initialize Jinja2 environment
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(str(self.templates_dir)),
+            trim_blocks=True,
+            lstrip_blocks=True
+        )
+        
+        logger.info(f"✅ Scaffold generator initialized: {self.templates_dir}")
+    
+    def generate(
+        self,
+        level: str,
+        name: str,
+        output_dir: str,
+        options: Optional[Dict[str, Any]] = None
+    ):
+        """
+        Generate agent scaffold.
+        
+        Args:
+            level: Agent type (chatbot, assistant, api, workflow, system)
+            name: Agent name
+            output_dir: Output directory path
+            options: Generation options (model, enable_mcp, etc.)
+        
+        Example:
+            generator.generate(
+                level="workflow",
+                name="research-agent",
+                output_dir="./research-agent",
+                options={
+                    "model": "databricks-claude-sonnet-4-5",
+                    "workflow": "plan-act-critique",
+                    "enable_optimization": True
+                }
+            )
+        """
+        options = options or {}
+        
+        # Validate level (only chatbot available in v0.1.0)
+        valid_levels = ["chatbot"]
+        if level not in valid_levels:
+            raise ValueError(f"Invalid level: {level}. Currently only 'chatbot' is available. More scaffolds coming in future releases.")
+        
+        # Create output directory
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        logger.info(f"🚀 Generating {level} scaffold: {name}")
+        logger.info(f"   Output: {output_path.absolute()}")
+        
+        # Prepare template context
+        context = {
+            "name": name,
+            "level": level,
+            "model": options.get("model", "databricks-claude-sonnet-4-5"),  # Modern default
+            "enable_mcp": options.get("enable_mcp", False),
+            "enable_optimization": options.get("enable_optimization", False),
+            "enable_memory": options.get("enable_memory", True if level != "l1" else False),
+            "workflow": options.get("workflow", "plan-act-critique"),
+            "agents": options.get("agents", ["agent_a", "agent_b"]),
+            "enable_a2a": options.get("enable_a2a", False),
+        }
+        
+        # Generate files based on level
+        template_mapping = self._get_template_mapping(level)
+        
+        for output_file, template_file in template_mapping.items():
+            self._render_template(
+                template_file=template_file,
+                output_file=output_path / output_file,
+                context=context
+            )
+        
+        logger.info(f"✅ Generated {level} scaffold: {name}")
+        logger.info(f"\n📁 Next steps:")
+        logger.info(f"   cd {output_dir}")
+        logger.info(f"   pip install -r requirements.txt")
+        logger.info(f"   python main.py  # Or see README.md")
+    
+    def _get_template_mapping(self, level: str) -> Dict[str, str]:
+        """
+        Get template file mapping for a level.
+        
+        Returns dict of {output_filename: template_filename}
+        """
+        mappings = {
+            "chatbot": {
+                "app.py": f"{level}/app.py.jinja2",
+                "chatbot.py": f"{level}/chatbot.py.jinja2",  # CLI version
+                "config.yaml": f"{level}/config.yaml.jinja2",
+                "requirements.txt": f"{level}/requirements.txt.jinja2",
+                "databricks-app.yml": f"{level}/databricks-app.yml.jinja2",
+                "README.md": f"{level}/README.md.jinja2",
+            }
+            # More scaffold types coming in future releases:
+            # - assistant (L2): Context-aware with memory
+            # - api (L3): FastAPI production endpoint
+            # - workflow (L4): LangGraph workflows
+            # - system (L5): Multi-agent with A2A
+        }
+        
+        return mappings.get(level, {})
+    
+    def _render_template(
+        self,
+        template_file: str,
+        output_file: Path,
+        context: Dict[str, Any]
+    ):
+        """
+        Render a Jinja2 template to output file.
+        
+        Args:
+            template_file: Template file path (relative to templates_dir)
+            output_file: Output file path
+            context: Template context variables
+        """
+        try:
+            # Load and render template
+            template = self.jinja_env.get_template(template_file)
+            rendered = template.render(**context)
+            
+            # Write to output file
+            output_file.parent.mkdir(parents=True, exist_ok=True)
+            output_file.write_text(rendered)
+            
+            logger.debug(f"   ✅ Generated: {output_file.name}")
+        
+        except Exception as e:
+            logger.error(f"   ❌ Failed to render {template_file}: {e}")
+            raise
+    
+    def list_levels(self) -> Dict[str, Dict[str, Any]]:
+        """
+        List available scaffold types with descriptions.
+        
+        Returns:
+            Dict of scaffold info
+        """
+        return {
+            "chatbot": {
+                "name": "Simple Chatbot",
+                "complexity": "Beginner",
+                "time": "2-4 hours",
+                "description": "Stateless chatbot using Databricks Model Serving",
+                "features": ["LLM integration", "Basic MLflow tracing"]
+            },
+            "assistant": {
+                "name": "Context-Aware Assistant",
+                "complexity": "Intermediate",
+                "time": "4-8 hours",
+                "description": "Assistant with conversation memory using Lakebase",
+                "features": ["Session management", "Memory (Lakebase)", "MLflow logging"]
+            },
+            "api": {
+                "name": "Production API",
+                "complexity": "Intermediate+",
+                "time": "8-16 hours",
+                "description": "Production-ready FastAPI application",
+                "features": ["FastAPI", "Error handling", "Health checks", "Optional MCP"]
+            },
+            "workflow": {
+                "name": "Complex Workflow",
+                "complexity": "Advanced",
+                "time": "16-32 hours",
+                "description": "LangGraph workflow with optimization",
+                "features": ["LangGraph", "Plan-Act-Critique", "Auto-optimization", "MCP tools"]
+            },
+            "system": {
+                "name": "Multi-Agent System",
+                "complexity": "Expert",
+                "time": "32-64 hours",
+                "description": "Multi-agent coordination with A2A",
+                "features": ["LangGraph", "Multi-agent", "A2A protocol", "Per-agent MCP", "Cross-agent optimization"]
+            }
+        }
+

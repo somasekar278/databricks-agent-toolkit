@@ -1,0 +1,90 @@
+# Databricks Apps Deployment: EMBEDDED MODE (TEMPLATE)
+#
+# Both MCP servers run inside the same container as the agent app.
+# Use for: 1-5 agents, < 100 req/min, development, prototypes
+#
+# NOTE: This is a TEMPLATE. To use this:
+# 1. Add MCP server implementations to your project (from databricks-mcp-server)
+# 2. Update the image registry
+# 3. Customize environment variables and resources
+
+resources:
+  - name: agent-app-embedded
+    description: "Agent application with embedded MCP servers"
+    
+    runtime:
+      kind: container
+      image: "your-registry/agent-app:latest"
+      command: ["uvicorn", "examples.databricks_app_configurable_mcp:app", "--host", "0.0.0.0", "--port", "8000"]
+      
+      env:
+        # Databricks credentials
+        - name: DATABRICKS_HOST
+          valueFrom:
+            secretRef: databricks-host
+        - name: DATABRICKS_TOKEN
+          valueFrom:
+            secretRef: databricks-token
+        
+        # MCP deployment mode
+        - name: MCP_DEPLOYMENT_CONFIG
+          value: "config/mcp_deployment_config.yaml"
+        - name: ENVIRONMENT
+          value: "production"
+        
+        # MLflow
+        - name: MLFLOW_TRACKING_URI
+          value: "databricks"
+      
+      ports:
+        - name: app
+          containerPort: 8000
+          protocol: TCP
+        - name: mlflow-mcp
+          containerPort: 5000
+          protocol: TCP
+        - name: databricks-mcp
+          containerPort: 6000
+          protocol: TCP
+      
+      resources:
+        requests:
+          cpu: "2"        # 2 vCPU guaranteed
+          memory: "8Gi"   # 8GB guaranteed
+        limits:
+          cpu: "4"        # Can burst to 4 vCPU
+          memory: "16Gi"  # Can burst to 16GB
+      
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 30
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+      
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 60
+        periodSeconds: 30
+        timeoutSeconds: 10
+        failureThreshold: 3
+
+# Ingress (optional)
+ingress:
+  enabled: true
+  rules:
+    - host: agents.your-company.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: agent-app-embedded
+                port:
+                  number: 8000
+

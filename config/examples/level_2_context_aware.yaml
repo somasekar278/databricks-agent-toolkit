@@ -1,0 +1,99 @@
+# ============================================================================
+# Level 2: Context-Aware Assistant (4-8 hours)
+# ============================================================================
+# 
+# What this level adds:
+# - ✅ Memory/context tracking
+# - ✅ Session management
+# - ✅ Conversation history
+# - ✅ Basic MLflow logging
+# - Still single agent
+#
+# Use case examples:
+# - Learning tutor (tracks student progress)
+# - Customer support bot (remembers conversation)
+# - Personal assistant (context-aware)
+# ============================================================================
+
+environment: dev
+
+# ============================================================================
+# AGENTS - Single agent with memory
+# ============================================================================
+
+agents:
+  assistant:
+    enabled: true
+    model_endpoint: "databricks-dbrx-instruct"
+    system_prompt: "You are a helpful assistant with memory. Reference previous conversation when relevant."
+    max_tokens: 1000
+    temperature: 0.7
+    
+    # Memory configuration
+    memory:
+      enabled: true
+      type: "short_term"  # Session-based memory
+      max_history: 10     # Last 10 interactions
+      context_window: 4096
+
+# ============================================================================
+# MEMORY SYSTEM - Basic short-term memory
+# ============================================================================
+
+memory:
+  enabled: true
+  
+  storage:
+    type: "in_memory"  # Simple dict-based storage for L2
+    
+  retrieval:
+    strategy: "recent"  # Just get recent history
+    max_items: 10
+
+# ============================================================================
+# MONITORING - Disabled for L2
+# ============================================================================
+
+monitoring:
+  deployment_mode: "disabled"
+  enabled: false
+
+# ============================================================================
+# OPTIMIZATION - Disabled for L2
+# ============================================================================
+
+optimization:
+  enabled: false
+
+# ============================================================================
+# DATABRICKS
+# ============================================================================
+
+databricks:
+  workspace:
+    host: ${DATABRICKS_HOST}
+    token: ${DATABRICKS_TOKEN}
+  
+  model_serving:
+    endpoint: "databricks-dbrx-instruct"
+
+# ============================================================================
+# TELEMETRY - Basic MLflow logging only
+# ============================================================================
+
+telemetry:
+  otel:
+    enabled: false
+  
+  mlflow:
+    enabled: true
+    tracking_uri: "databricks"
+    experiment_name: "/Users/${USER}/assistant-experiments"
+    log_inputs: true
+    log_outputs: true
+    log_metrics:
+      - "response_time"
+      - "token_count"
+
+
+

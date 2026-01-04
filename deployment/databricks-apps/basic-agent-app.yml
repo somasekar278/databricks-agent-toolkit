@@ -1,0 +1,87 @@
+# Databricks Apps Deployment: BASIC AGENT APP
+#
+# Deploy just your agent application (no MCP servers).
+# Use for: Simple agents that don't need self-improvement
+#
+# This is the SIMPLEST deployment - just your agent code.
+
+resources:
+  - name: my-agent-app
+    description: "Agent application"
+    
+    runtime:
+      kind: container
+      image: "your-registry/my-agent-app:latest"  # UPDATE THIS
+      command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+      
+      env:
+        # Databricks credentials
+        - name: DATABRICKS_HOST
+          valueFrom:
+            secretRef: databricks-host
+        - name: DATABRICKS_TOKEN
+          valueFrom:
+            secretRef: databricks-token
+        
+        # MLflow tracking
+        - name: MLFLOW_TRACKING_URI
+          value: "databricks"
+        - name: MLFLOW_EXPERIMENT_NAME
+          value: "/agents/my-agent"
+        
+        # Your agent config
+        - name: AGENT_CONFIG_PATH
+          value: "config/agent_config.yaml"
+      
+      ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+      
+      # Resource limits
+      resources:
+        requests:
+          cpu: "1"
+          memory: "4Gi"
+        limits:
+          cpu: "2"
+          memory: "8Gi"
+    
+    # Health check
+    health:
+      httpPath: /health
+      port: 8000
+      intervalSeconds: 30
+      timeoutSeconds: 10
+      unhealthyThreshold: 3
+    
+    # Auto-scaling
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 5
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 70
+
+# Example FastAPI app structure:
+# 
+# main.py:
+#   from fastapi import FastAPI
+#   from mcp import McpClient  # If using MCP
+#   
+#   app = FastAPI()
+#   
+#   @app.get("/health")
+#   async def health():
+#       return {"status": "healthy"}
+#   
+#   @app.post("/agent/chat")
+#   async def chat(query: str):
+#       # Your agent logic
+#       return {"response": "..."}
+

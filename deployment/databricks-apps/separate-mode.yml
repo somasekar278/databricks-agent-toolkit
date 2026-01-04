@@ -1,0 +1,141 @@
+# Databricks Apps Deployment: SEPARATE MODE (TEMPLATE)
+#
+# NOTE: This is a TEMPLATE showing how to deploy agents + MCP servers separately.
+# To use this:
+# 1. Deploy MCP servers separately (from databricks-mcp-server project)
+# 2. Update agent app image registry
+# 3. Update MCP server endpoints
+# 4. Customize resources
+#
+# Databricks Apps Deployment: SEPARATE MODE
+#
+# MCP servers run in a separate container from the agent app.
+# Use for: 5-20 agents, 100-500 req/min, multiple teams
+
+# ============================================================================
+# Service 1: MCP Servers (Shared)
+# ============================================================================
+resources:
+  - name: mcp-servers
+    description: "Shared MCP servers for all agent applications"
+    
+    runtime:
+      kind: container
+      image: "your-registry/mcp-servers:latest"
+      
+      # Startup script that runs both MCP servers
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          # Start MLflow MCP in background
+          mlflow server mcp --host 0.0.0.0 --port 5000 &
+          
+          # Start Databricks MCP in foreground
+          python -m databricks_mcp.server --host 0.0.0.0 --port 6000
+      
+      env:
+        - name: DATABRICKS_HOST
+          valueFrom:
+            secretRef: databricks-host
+        - name: DATABRICKS_TOKEN
+          valueFrom:
+            secretRef: databricks-token
+        - name: MLFLOW_TRACKING_URI
+          value: "databricks"
+      
+      ports:
+        - name: mlflow-mcp
+          containerPort: 5000
+          protocol: TCP
+        - name: databricks-mcp
+          containerPort: 6000
+          protocol: TCP
+      
+      resources:
+        requests:
+          cpu: "1"
+          memory: "4Gi"
+        limits:
+          cpu: "2"
+          memory: "8Gi"
+      
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 5000
+        initialDelaySeconds: 15
+        periodSeconds: 10
+      
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 5000
+        initialDelaySeconds: 30
+        periodSeconds: 30
+
+# ============================================================================
+# Service 2: Agent Application
+# ============================================================================
+  - name: agent-app
+    description: "Agent application (connects to separate MCP servers)"
+    
+    runtime:
+      kind: container
+      image: "your-registry/agent-app:latest"
+      command: ["uvicorn", "examples.databricks_app_configurable_mcp:app", "--host", "0.0.0.0", "--port", "8000"]
+      
+      env:
+        - name: DATABRICKS_HOST
+          valueFrom:
+            secretRef: databricks-host
+        - name: DATABRICKS_TOKEN
+          valueFrom:
+            secretRef: databricks-token
+        
+        # Point to separate MCP servers
+        - name: MCP_DEPLOYMENT_CONFIG
+          value: "config/mcp_deployment_config.yaml"
+        - name: ENVIRONMENT
+          value: "production"
+        
+        # Override config to use separate mode
+        - name: MLFLOW_MCP_ENDPOINT
+          value: "http://mcp-servers:5000"
+        - name: DATABRICKS_MCP_ENDPOINT
+          value: "http://mcp-servers:6000"
+      
+      ports:
+        - name: app
+          containerPort: 8000
+          protocol: TCP
+      
+      resources:
+        requests:
+          cpu: "2"
+          memory: "8Gi"
+        limits:
+          cpu: "4"
+          memory: "16Gi"
+      
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 20
+        periodSeconds: 10
+      
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 40
+        periodSeconds: 30
+
+# ============================================================================
+# Service Discovery
+# ============================================================================
+# Databricks Apps will create internal DNS:
+# - mcp-servers:5000 → MLflow MCP
+# - mcp-servers:6000 → Databricks MCP
+# - agent-app:8000 → Agent application
+
