@@ -123,7 +123,14 @@ class ScaffoldGenerator:
         logger.info("\n📁 Next steps:")
         logger.info(f"   cd {output_dir}")
         logger.info("   pip install -r requirements.txt")
-        logger.info("   python app.py  # Or see README.md")
+        if level == "chatbot":
+            logger.info("   python chatbot.py  # CLI")
+            logger.info("   # Or: python start_server.py  # Web app")
+        elif level == "assistant":
+            logger.info("   python assistant.py  # CLI")
+            logger.info("   # Or: python start_server.py  # Web app")
+        else:
+            logger.info("   # See README.md for instructions")
 
     def _get_template_mapping(self, level: str) -> Dict[str, str]:
         """
@@ -133,7 +140,8 @@ class ScaffoldGenerator:
         """
         mappings = {
             "chatbot": {
-                "app.py": f"{level}/app.py.jinja2",
+                "agent.py": f"{level}/agent.py.jinja2",  # Agent logic (v0.2.0)
+                "start_server.py": f"{level}/start_server.py.jinja2",  # FastAPI server (v0.2.0)
                 "chatbot.py": f"{level}/chatbot.py.jinja2",  # CLI version
                 "config.yaml": f"{level}/config.yaml.jinja2",
                 "requirements.txt": f"{level}/requirements.txt.jinja2",
@@ -143,7 +151,8 @@ class ScaffoldGenerator:
                 "README.md": f"{level}/README.md.jinja2",
             },
             "assistant": {
-                "app.py": f"{level}/app.py.jinja2",
+                "agent.py": f"{level}/agent.py.jinja2",  # Agent logic (v0.2.0)
+                "start_server.py": f"{level}/start_server.py.jinja2",  # FastAPI server (v0.2.0)
                 "assistant.py": f"{level}/assistant.py.jinja2",  # CLI version
                 "memory_manager.py": f"{level}/memory_manager.py.jinja2",
                 "rag_manager.py": f"{level}/rag_manager.py.jinja2",

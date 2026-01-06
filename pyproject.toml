@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "databricks-agent-toolkit"
-version = "0.1.33"
+version = "0.2.0"
 description = "Unified toolkit for building production agents on Databricks - pre-wired integrations for LangGraph, LangChain, and custom agents"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -131,6 +131,8 @@ packages.find = {where = ["."], include = ["databricks_agent_toolkit*", "shared*
 
 [project.scripts]
 databricks-agent-toolkit = "databricks_agent_toolkit.cli.main:main"
+dbat = "databricks_agent_toolkit.cli.main:main"  # Short alias (Databricks Agent Toolkit)
+dat = "databricks_agent_toolkit.cli.main:main"   # Shorter alias
 
 [tool.black]
 line-length = 100

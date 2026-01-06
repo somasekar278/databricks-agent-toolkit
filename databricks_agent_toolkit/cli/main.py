@@ -22,7 +22,7 @@ except ImportError:
 def print_banner():
     """Print toolkit banner."""
     print(
-        """
+        f"""
     ╔═══════════════════════════════════════════════════════════╗
     ║                                                           ║
     ║       Databricks Agent Toolkit v{__version__}                   ║

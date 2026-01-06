@@ -84,3 +84,16 @@ mcp-servers/*.log
 
 # Cleanup plans
 CLEANUP_*.md
+
+# Test scaffolds (don't commit generated test projects)
+test-*/
+*-test/
+e2e-test*/
+my-*/
+
+# Research/temporary directories
+databricks-app-templates-research/
+app-templates/
+
+# Test documents (examples only, not part of package)
+test_documents/

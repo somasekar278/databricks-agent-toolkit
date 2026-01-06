@@ -1,0 +1,157 @@
+# Monitor Official Databricks App Templates
+# Runs daily to check for updates and test compatibility
+
+name: Monitor App Templates
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout our repo
+        uses: actions/checkout@v4
+
+      - name: Clone official app-templates
+        run: |
+          git clone https://github.com/databricks/app-templates.git /tmp/app-templates
+          cd /tmp/app-templates
+          echo "LATEST_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "LATEST_DATE=$(git log -1 --format=%cd --date=short)" >> $GITHUB_ENV
+
+      - name: Check last known version
+        id: check-version
+        run: |
+          # Store last known commit in .github/app-templates-version.txt
+          if [ -f .github/app-templates-version.txt ]; then
+            LAST_COMMIT=$(cat .github/app-templates-version.txt)
+            echo "LAST_COMMIT=$LAST_COMMIT" >> $GITHUB_ENV
+
+            if [ "$LAST_COMMIT" != "${{ env.LATEST_COMMIT }}" ]; then
+              echo "NEW_CHANGES=true" >> $GITHUB_ENV
+              echo "✅ New changes detected in app-templates!"
+            else
+              echo "NEW_CHANGES=false" >> $GITHUB_ENV
+              echo "ℹ️ No new changes in app-templates"
+            fi
+          else
+            echo "NEW_CHANGES=true" >> $GITHUB_ENV
+            echo "✅ First time checking app-templates"
+          fi
+
+      - name: Analyze changes
+        if: env.NEW_CHANGES == 'true'
+        run: |
+          cd /tmp/app-templates
+
+          # List all chatbot templates
+          echo "## Current Chatbot Templates" > /tmp/report.md
+          for dir in *-chatbot-app*; do
+            if [ -d "$dir" ]; then
+              echo "- $dir" >> /tmp/report.md
+            fi
+          done
+
+          # Check for changes in relevant templates
+          echo "" >> /tmp/report.md
+          echo "## Recent Changes" >> /tmp/report.md
+          git log --since="${{ env.LAST_COMMIT }}" --oneline --decorate \
+            -- '*-chatbot-app*' >> /tmp/report.md || echo "No changes in chatbot templates" >> /tmp/report.md
+
+          cat /tmp/report.md
+
+      - name: Test compatibility
+        if: env.NEW_CHANGES == 'true'
+        run: |
+          # Set up Python
+          python -m pip install --upgrade pip
+          pip install -e .
+
+          # Generate test scaffold
+          databricks-agent-toolkit generate chatbot test-compat-bot
+
+          # Check our backend provides expected endpoints
+          cd test-compat-bot
+          pip install -r requirements.txt
+
+          # Start server in background
+          python start_server.py &
+          SERVER_PID=$!
+          sleep 5
+
+          # Test OpenAI API endpoint
+          curl -X POST http://localhost:8000/api/invocations \
+            -H "Content-Type: application/json" \
+            -d '{"input": [{"role": "user", "content": "test"}], "stream": false}' \
+            || echo "⚠️ API endpoint test failed"
+
+          # Test health endpoint
+          curl http://localhost:8000/health || echo "⚠️ Health endpoint test failed"
+
+          # Test OpenAPI docs
+          curl http://localhost:8000/docs || echo "⚠️ OpenAPI docs not available"
+
+          kill $SERVER_PID
+
+      - name: Create issue if changes detected
+        if: env.NEW_CHANGES == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('/tmp/report.md', 'utf8');
+
+            const body = `## Official App Templates Updated
+
+            New changes detected in the official Databricks app-templates repository.
+
+            **Latest Commit:** ${{ env.LATEST_COMMIT }}
+            **Date:** ${{ env.LATEST_DATE }}
+            **Previous:** ${{ env.LAST_COMMIT }}
+
+            ${report}
+
+            ## Action Required
+            1. Review changes
+            2. Test compatibility
+            3. Update documentation
+
+            ## Compatibility Checklist
+            - [ ] OpenAI API endpoint format
+            - [ ] Streaming support (SSE)
+            - [ ] Health endpoint
+            - [ ] OpenAPI schema
+            - [ ] New templates added
+            - [ ] Breaking changes`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔔 New changes in databricks/app-templates',
+              body: body,
+              labels: ['compatibility', 'monitoring', 'upstream-sync']
+            });
+
+      - name: Update version file
+        if: env.NEW_CHANGES == 'true'
+        run: |
+          mkdir -p .github
+          echo "${{ env.LATEST_COMMIT }}" > .github/app-templates-version.txt
+
+          # Commit the update
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/app-templates-version.txt
+          git commit -m "chore: update app-templates tracking to ${{ env.LATEST_COMMIT }}"
+          git push
+
+      - name: Notify on Slack (optional)
+        if: env.NEW_CHANGES == 'true'
+        run: |
+          # Add Slack webhook notification if desired
+          echo "📢 Would notify team about app-templates update"

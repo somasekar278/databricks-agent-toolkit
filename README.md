@@ -1,417 +1,495 @@
 # Databricks Agent Toolkit
 
 [![PyPI version](https://badge.fury.io/py/databricks-agent-toolkit.svg)](https://pypi.org/project/databricks-agent-toolkit/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
-**Unified toolkit for building production agents on Databricks**
+**Build production agents on Databricks in minutes, not days.**
 
-Pre-wired integrations + scaffolding generators for LangGraph, LangChain, and custom agents.
+Generate production-ready agent scaffolds that follow official Databricks patterns and work with any of the 6 official UI templates.
+
+```bash
+pip install databricks-agent-toolkit
+
+# Generate a chatbot (use the short alias!)
+dbat generate chatbot my-bot
+cd my-bot
+python start_server.py
+
+# 🎉 Done! Agent running at http://localhost:8000
+```
 
 ---
 
-## What This Is
+## Why This Toolkit?
 
-**A toolkit, not a framework.**
+**Philosophy: "On Top Of, Not Instead Of"**
 
-- Use with **LangGraph**, **LangChain**, or your own agent code
-- Pre-wired integrations to **all Databricks services**
-- Best practices for **Databricks-native agents**
-- **Optional scaffolds** to generate working code
+We don't create custom frameworks. We generate **production-ready agent backends** that follow:
+- ✅ **OpenAI API standard** (industry-wide compatibility)
+- ✅ **Official Databricks patterns** (FastAPI + OpenAPI)
+- ✅ **MLflow best practices** (auto-tracing, experiments)
+- ✅ **Databricks integrations** (Model Serving, Lakebase, Unity Catalog)
 
-Think of it like **Create React App** but for Databricks agents.
+**Your agents work with:**
+- All 6 official [Databricks UI templates](https://github.com/databricks/app-templates)
+- Any OpenAI-compatible UI framework
+- Custom frontends (React, Streamlit, Gradio, etc.)
 
 ---
 
 ## Quick Start
 
-### Option 1: Use Integrations Directly
+### 1. Install
 
 ```bash
 pip install databricks-agent-toolkit
 ```
 
-```python
-from databricks_agent_toolkit.integrations import DatabricksLLM
-
-# Easy Databricks Model Serving (auto-auth, auto-trace)
-llm = DatabricksLLM(endpoint="databricks-claude-sonnet-4-5")
-response = await llm.chat([{"role": "user", "content": "Hello!"}])
-print(response["content"])
-```
-
-### Option 2: Generate a Scaffold
+### 2. Generate an Agent
 
 ```bash
-pip install databricks-agent-toolkit
+# Use the short alias (much easier to type!)
+dbat generate chatbot my-bot
 
-# Generate chatbot (L1) - Simple conversational AI
-databricks-agent-toolkit generate chatbot my-bot
+# Or the full command:
+# databricks-agent-toolkit generate chatbot my-bot
+```
 
-# Generate assistant (L2) - With memory + RAG
-databricks-agent-toolkit generate assistant my-assistant
+**Available aliases:**
+- `dbat` → Databricks Agent Toolkit ✨ **(recommended)**
+- `dat` → Even shorter!
+- `databricks-agent-toolkit` → Full command
 
-cd my-assistant
+### 3. What You Get
+
+```
+my-bot/
+├── agent.py              # Your agent logic (OpenAI API compatible)
+├── start_server.py       # FastAPI server with auto-docs
+├── chatbot.py           # CLI interface for testing
+├── config.yaml          # Easy configuration
+├── requirements.txt     # All dependencies
+├── databricks.yml       # Deploy to Databricks Apps
+├── app.yaml            # App configuration
+└── README.md           # Setup instructions
+```
+
+### 4. Run Locally
+
+```bash
+cd my-bot
 pip install -r requirements.txt
 
-# Configure RAG in config.yaml (optional)
-# rag:
-#   enabled: true
-#   source: /Volumes/main/default/docs
-#   backend: pgvector  # or vector_search
+# Start the server
+python start_server.py
+# 🚀 Backend: http://localhost:8000
+# 📚 API Docs: http://localhost:8000/docs
+# 💚 Health: http://localhost:8000/health
 
-python app.py  # Web UI on http://localhost:8000
-
-# Deploy to Databricks Apps
-databricks apps deploy my-assistant
+# Or test in CLI
+python chatbot.py
 ```
 
----
+### 5. Deploy to Databricks
 
-## ✨ New in 0.1.3: RAG-Powered Assistants
+```bash
+# One command deployment
+databricks bundle deploy
 
-The L2 Assistant scaffold now includes **production-ready RAG** with two backends:
-
-### **pgvector** (Default, Cost-Effective)
-- 🚀 Instant setup (< 1 second)
-- 💰 Included in Lakebase, no extra cost
-- 📊 IVFFlat (fast) or HNSW (accurate) indexing
-- 📁 Auto-indexes from UC Volumes
-- ✅ Perfect for small-medium knowledge bases (100s-10,000s docs)
-
-### **Databricks Vector Search** (Enterprise-Scale)
-- 🌐 Millions of documents
-- 🔄 Auto-sync via Delta Change Data Feed
-- 🤖 Managed embeddings (Databricks FMAPI)
-- 🏢 Enterprise features (versioning, lineage, governance)
-- ✅ Perfect for large-scale production RAG
-
-**Both backends:**
-- Auto-index documents from UC Volumes on startup
-- Generate embeddings using Databricks Foundation Models
-- Support incremental updates
-- Configurable via `config.yaml`
-
-```yaml
-# Simple pgvector setup
-rag:
-  enabled: true
-  source: /Volumes/main/default/docs
-  backend: pgvector
-  index_type: ivfflat  # or hnsw for better accuracy
+# Your app is live at: https://<workspace>/apps/my-bot
 ```
 
 ---
 
 ## What's Included
 
-### **Storage & Memory: Choose the Right Tool**
-
-**Lakebase (PostgreSQL)** - Use for:
-- Conversational memory (chat history, sessions)
-- Structured agent data (user profiles, configurations)
-- OLTP workloads (fast reads/writes)
-- pgvector for small-scale embeddings
-
-**DatabricksVectorSearch (Delta Lake)** - Use for:
-- Large-scale RAG (millions of documents)
-- Knowledge bases synced from Delta tables
-- Semantic search across data lake
-- Auto-embedding with Databricks models
-
-**Both work together!** L2+ agents typically use Lakebase for conversations and Vector Search for knowledge retrieval.
-
-### **Integrations** (Pre-wired Databricks Services)
-
-```python
-from databricks_agent_toolkit.integrations import (
-    DatabricksLLM,           # Model Serving
-    DatabricksMCPTools,      # Managed MCP Servers
-    UnityAgentArtifacts,     # Unity Catalog
-    Lakebase,                # Managed PostgreSQL (conversations, memory)
-    DatabricksVectorSearch,  # Delta Lake vector search (RAG, knowledge bases)
-    DatabricksAppDeployment  # Apps deployment
-)
-```
-
-- **Model Serving** - Easy LLM client with OAuth M2M auth, MLflow auto-tracing
-- **Unity Catalog** - Manage prompts, configs, functions
-- **Lakebase** - Managed PostgreSQL for conversational memory + pgvector for RAG
-- **DatabricksVectorSearch** - Delta Lake-based vector search for enterprise RAG
-- **RAG Manager** - Auto-indexing from UC Volumes, dual-backend support (NEW in 0.1.3)
-- **Scaffold Validator** - Auto-validates generated scaffolds (NEW in 0.1.3)
-- **Managed MCP Servers** - Vector Search, Genie, UC Functions, DBSQL
-- **Databricks Apps** - One-command deployment
-- **Workflows** - Schedule optimization jobs
-- **SQL Dashboards** - Pre-built monitoring
-
-### **Evaluation** (MLflow 3 GenAI)
-
-Located in `evaluation/`:
-- Built-in scorers (Correctness, Groundedness, Safety)
-- Custom scorers & judges
-- Automatic evaluation logging
-
-### **Optimization** (DSPy + TextGrad)
-
-Located in `optimization/`:
-- Automatic prompt optimization
-- Store optimized prompts to Unity Catalog
-- A/B testing support
-
-### **Telemetry** (Zerobus + OpenTelemetry)
-
-Located in `telemetry/`:
-- Real-time event tracking
-- Automatic Delta Lake writes
-- Pre-built dashboards
-
-### **CLI Tools**
+### **L1: Chatbot (Simple Conversational AI)**
 
 ```bash
-databricks-agent-toolkit generate chatbot my-bot      # L1: Simple chatbot
-databricks-agent-toolkit generate assistant my-agent  # L2: With memory + RAG
+dbat generate chatbot my-bot
 ```
 
-**Scaffold Types (v0.1.3):**
+**Features:**
+- 💬 OpenAI API compatible (`/api/invocations`)
+- 🔄 Streaming with Server-Sent Events (SSE)
+- 📊 MLflow auto-tracing
+- 🎛️ Configuration-driven (no code changes to switch models)
+- 🚀 One-command deploy to Databricks Apps
+- 📝 Built-in web UI (or use official templates)
+- 📖 Auto-generated OpenAPI docs
 
-| Scaffold | Status | Features |
-|----------|--------|----------|
-| **chatbot** (L1) | ✅ Available | Simple conversational AI, MLflow tracing |
-| **assistant** (L2) | ✅ Available | Memory (Lakebase), RAG (pgvector/Vector Search), UC Volumes |
-| **api** (L3) | 🔜 Coming soon | FastAPI production endpoint |
-| **workflow** (L4) | 🔜 Coming soon | LangGraph workflows |
-| **system** (L5) | 🔜 Coming soon | Multi-agent with A2A |
+**Perfect for:**
+- Quick prototypes and demos
+- Simple Q&A bots
+- Customer support assistants
+- Internal tools
 
 ---
 
-## Example: LangGraph Agent with Databricks
+### **L2: Assistant (With Memory + RAG)**
+
+```bash
+dbat generate assistant my-assistant --enable-rag
+```
+
+**Everything in L1, plus:**
+- 💾 Conversation memory (Lakebase/PostgreSQL)
+- 🧠 RAG with pgvector or Databricks Vector Search
+- 📁 Auto-index documents from Unity Catalog Volumes
+- 🔐 Session management
+- 👥 Multi-user support
+
+**Perfect for:**
+- Knowledge base assistants
+- Document Q&A
+- Support bots with history
+- Enterprise applications
+
+---
+
+## Configuration
+
+Edit `config.yaml` to customize your agent:
+
+```yaml
+# config.yaml
+model:
+  endpoint: databricks-meta-llama-3-1-70b-instruct  # Any Databricks Model Serving endpoint
+  temperature: 0.7
+  max_tokens: 500
+  streaming: true
+  token_delay_ms: 50  # Streaming speed (lower = faster)
+  system_prompt: "You are a helpful AI assistant."
+
+mlflow:
+  experiment: /Shared/my-bot
+  auto_trace: true  # Automatic tracing of all LLM calls
+
+# L2 only: Memory configuration
+memory:
+  enabled: true
+  backend: lakebase
+  host: ${LAKEBASE_HOST}
+  database: ${LAKEBASE_DATABASE}
+
+# L2 only: RAG configuration
+rag:
+  enabled: true
+  source: /Volumes/main/default/docs  # Unity Catalog Volume
+  backend: pgvector  # or vector_search
+  embedding_model: databricks-bge-large-en
+```
+
+**No code changes needed!** Just edit config and redeploy.
+
+---
+
+## Official UI Templates
+
+Your agent backend is **100% compatible** with all official Databricks UI templates:
+
+| **Framework** | **Best For** | **Template** |
+|---------------|--------------|--------------|
+| **Streamlit** | Quick prototypes, data apps | [streamlit-chatbot-app](https://github.com/databricks/app-templates/tree/main/streamlit-chatbot-app) |
+| **Gradio** | ML demos, simple interfaces | [gradio-chatbot-app](https://github.com/databricks/app-templates/tree/main/gradio-chatbot-app) |
+| **Plotly Dash** | Data dashboards with chat | [dash-chatbot-app](https://github.com/databricks/app-templates/tree/main/dash-chatbot-app) |
+| **Shiny** | Statistical apps, R users | [shiny-chatbot-app](https://github.com/databricks/app-templates/tree/main/shiny-chatbot-app) |
+| **React** | Production, enterprise | [e2e-chatbot-app](https://github.com/databricks/app-templates/tree/main/e2e-chatbot-app) |
+| **Next.js** | Modern production, SSR | [e2e-chatbot-app-next](https://github.com/databricks/app-templates/tree/main/e2e-chatbot-app-next) |
+
+**Why compatible?**
+We follow the **OpenAI API standard** that all these UIs expect (`/api/invocations` endpoint).
+
+**Using official UIs:**
+```bash
+# 1. Generate our backend
+dbat generate chatbot my-bot
+
+# 2. Clone official UI
+git clone https://github.com/databricks/app-templates.git
+cp -r app-templates/streamlit-chatbot-app my-bot/frontend
+
+# 3. Point UI to backend (http://localhost:8000)
+# 4. Deploy together!
+```
+
+**Coming in v0.3.0:** One-command integration!
+```bash
+dbat generate chatbot my-bot --ui=streamlit
+# ✅ Backend + official Streamlit UI, pre-configured!
+```
+
+See [UI Integration Guide](docs/UI_FRAMEWORK_INTEGRATION.md) for details.
+
+---
+
+## API Documentation
+
+Your agent comes with **auto-generated OpenAPI documentation**:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **OpenAPI JSON**: http://localhost:8000/openapi.json
+- **Health Check**: http://localhost:8000/health
+
+### Example API Call
 
 ```python
-from langgraph.graph import StateGraph
-from databricks_agent_toolkit.integrations import (
-    DatabricksLLM,
-    DatabricksMCPTools,
-    UnityAgentArtifacts
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/invocations",
+    json={
+        "input": [{"role": "user", "content": "Hello!"}],
+        "stream": False
+    }
+)
+print(response.json()["output"][0]["content"])
+```
+
+### Streaming Example
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/api/invocations",
+    json={
+        "input": [{"role": "user", "content": "Tell me a story"}],
+        "stream": True
+    },
+    stream=True
 )
 
-# 1. Pre-wired Databricks services (easy!)
-llm = DatabricksLLM(endpoint="databricks-claude-sonnet-4-5")
-mcp = DatabricksMCPTools(servers={
-    "vector_search": {"catalog": "prod", "schema": "docs"}
-})
-uc = UnityAgentArtifacts(catalog="main", schema="agents")
-
-# 2. Your agent logic (standard LangGraph)
-async def my_agent(state):
-    tools = await mcp.get_tool_schemas()
-    response = await llm.chat(
-        messages=state["messages"],
-        tools=tools
-    )
-    return {"response": response}
-
-# 3. Build workflow (standard LangGraph)
-workflow = StateGraph()
-workflow.add_node("agent", my_agent)
-app = workflow.compile()
-
-# 4. Deploy (one line - coming soon)
-# from databricks_agent_toolkit.integrations import DatabricksAppDeployment
-# deployer = DatabricksAppDeployment()
-# url = deployer.deploy_agent(agent_name="my-agent", app_code_path=".")
+for line in response.iter_lines():
+    if line.startswith(b"data: "):
+        token = line[6:].decode('utf-8')
+        if token != "[DONE]":
+            print(token, end="", flush=True)
 ```
 
 ---
 
-## vs. Other Frameworks
+## Features
 
-| | **Databricks Agent Toolkit** | **LangGraph** | **LangChain** |
-|---|---|---|---|
-| **Purpose** | Databricks integrations | Agent framework | LLM framework |
-| **Use Together?** | YES | Primary framework | Alternative framework |
-| **Model Serving** | Pre-wired | You integrate | You integrate |
-| **Unity Catalog** | Pre-wired | You integrate | You integrate |
-| **Lakebase** | Pre-wired | You integrate | You integrate |
-| **Managed MCPs** | Pre-wired | You integrate | You integrate |
-| **MLflow 3** | Pre-wired | You integrate | You integrate |
-| **Databricks Apps** | One-command deploy | You figure out | You figure out |
+### **Production-Ready**
+- ✅ FastAPI for performance and reliability
+- ✅ OpenAPI schema for API documentation
+- ✅ Health endpoints for monitoring
+- ✅ Error handling and logging
+- ✅ CORS configured for web UIs
 
-**Use this toolkit WITH LangGraph or LangChain, not instead of.**
+### **Databricks-Native**
+- ✅ Auto-authentication with Databricks
+- ✅ MLflow auto-tracing (track all LLM calls)
+- ✅ Unity Catalog for data governance
+- ✅ Model Serving integration
+- ✅ Lakebase (PostgreSQL) for memory
+- ✅ Vector Search for RAG
 
----
+### **Developer Experience**
+- ✅ Configuration-driven (YAML, no code changes)
+- ✅ CLI for quick testing
+- ✅ Local development with hot-reload
+- ✅ One-command deployment
+- ✅ Comprehensive documentation
 
-## Documentation
-
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Deployment model, Apps vs Workflows, optimization strategy
-- **[Quick Start](docs/GETTING_STARTED.md)** - Get started in 5 minutes
-- **[Integrations Guide](docs/PLATFORM_INTEGRATION.md)** - All Databricks services
-- **[Examples](examples/)** - LangGraph, LangChain, custom agents
-- **[Evaluation Guide](docs/EVALUATION_GUIDE.md)** - MLflow 3 evaluation
-- **[Optimization Guide](docs/EVALUATION_GUIDE.md#optimization)** - DSPy + TextGrad
-
----
-
-## Learning Path
-
-| Level | Complexity | Time | What You Build | Status |
-|-------|-----------|------|----------------|--------|
-| **L1 (chatbot)** | Simple | 2-4h | Simple chatbot (learn basics) | ✅ v0.1.0 |
-| **L2 (assistant)** | Basic+ | 4-8h | Assistant with memory + RAG | ✅ v0.1.3 |
-| **L3 (api)** | Intermediate | 8-16h | Production API (FastAPI + toolkit) | 🔜 Coming soon |
-| **L4 (workflow)** | Advanced | 16-32h | Complex workflow (LangGraph + optimization) | 🔜 Coming soon |
-| **L5 (system)** | Expert | 32-64h | Multi-agent system (LangGraph + A2A) | 🔜 Coming soon |
-
-See `config/examples/` for configuration templates.
+### **Standards-Based**
+- ✅ OpenAI API format (universal compatibility)
+- ✅ Server-Sent Events (SSE) for streaming
+- ✅ OpenAPI 3.0 schema
+- ✅ REST best practices
 
 ---
 
 ## Architecture
 
-### **Deployment Model**
-
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Databricks Apps (Real-time, Always-On)                 │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │ L1-L2: Flask Web UI (chatbot, assistant)          │ │ ← User interaction
-│  │ L3-L5: FastAPI REST API (workflows, systems)      │ │ ← API calls
-│  └────────────────────────────────────────────────────┘ │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │ Supervisory Agent (optional)                      │ │ ← Self-improvement
-│  │  - Monitors MLflow metrics in real-time          │ │
-│  │  - Triggers on-demand optimization               │ │
-│  │  - Auto-fixes performance issues                 │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
-              ↕ (logs traces)        ↕ (reads/writes)
-┌─────────────────────────────────────────────────────────┐
-│  Unity Catalog + MLflow                                  │
-│  - Prompts, configs, models                             │
-│  - Evaluation metrics & traces                          │
-│  - Training datasets                                     │
-└─────────────────────────────────────────────────────────┘
-              ↕ (scheduled jobs)
-┌─────────────────────────────────────────────────────────┐
-│  Databricks Workflows (Batch/Scheduled)                  │
-│  - Nightly prompt optimization (DSPy/TextGrad)          │ ← Scheduled
-│  - Batch evaluation runs                                │
-│  - Dataset preparation                                   │
-│  - Monitoring reports                                    │
-└─────────────────────────────────────────────────────────┘
+Your Application
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  ┌─────────────┐        ┌──────────────────┐  │
+│  │  Your UI    │◄──────►│  Agent Backend   │  │
+│  │             │        │  (our toolkit)   │  │
+│  │ - Streamlit │        │                  │  │
+│  │ - React     │        │ - agent.py       │  │
+│  │ - Gradio    │        │ - FastAPI server │  │
+│  │ - Custom    │        │ - OpenAI API     │  │
+│  └─────────────┘        └────────┬─────────┘  │
+│                                  │             │
+└──────────────────────────────────┼─────────────┘
+                                   │
+                    ┌──────────────┴──────────────┐
+                    │   Databricks Platform       │
+                    │                             │
+                    │ - Model Serving (LLMs)      │
+                    │ - MLflow (tracing)          │
+                    │ - Lakebase (memory)         │
+                    │ - Vector Search (RAG)       │
+                    │ - Unity Catalog (data)      │
+                    └─────────────────────────────┘
 ```
 
-### **Optimization Strategy: Dual Approach**
+**We provide the agent backend. You choose the UI.**
 
-**1. Scheduled Optimization** (Databricks Workflows)
-- Runs nightly/weekly on a schedule
-- Uses accumulated traces since last run
-- Stable, predictable improvements
-- Lower compute cost (batch processing)
+---
 
-**2. On-Demand Self-Improvement** (Supervisory Agent in Apps)
-- Monitors agent performance in real-time
-- Triggers optimization when needed:
-  - Error rate spikes
-  - User feedback drops below threshold
-  - Performance degrades
-  - Manual trigger via API
-- Faster response to issues
-- Slightly higher compute cost (always monitoring)
+## Examples
 
-**Both work together:** Scheduled for maintenance, on-demand for reactive fixes.
-
-### **Stack Layers**
-
-```
-Your Agent Code (LangGraph/LangChain/Custom)
-    ↓
-Databricks Agent Toolkit (Integrations Layer)
-    ↓
-Databricks Services (Model Serving, UC, Lakebase, MCP, etc.)
+### **Basic Chatbot**
+```bash
+dbat generate chatbot hello-bot
+cd hello-bot
+python start_server.py
 ```
 
-**You own:** Agent logic, workflows, business rules
-**Toolkit provides:** Easy access to all Databricks services
-**Databricks provides:** Infrastructure, services, deployment
+### **Assistant with Memory**
+```bash
+dbat generate assistant support-bot
+cd support-bot
+# Configure Lakebase in databricks.yml
+databricks bundle deploy
+```
+
+### **RAG-Powered Assistant**
+```bash
+dbat generate assistant doc-bot --enable-rag
+cd doc-bot
+
+# Edit config.yaml:
+# rag:
+#   enabled: true
+#   source: /Volumes/main/default/docs
+#   backend: pgvector
+
+databricks bundle deploy
+```
+
+### **Custom Model**
+```bash
+dbat generate chatbot custom-bot
+cd custom-bot
+
+# Edit config.yaml:
+# model:
+#   endpoint: my-custom-endpoint
+#   temperature: 0.9
+#   max_tokens: 1000
+
+python start_server.py
+```
+
+---
+
+## Requirements
+
+- **Python**: 3.9+
+- **Databricks**: Workspace access (for deployment)
+- **Model Serving**: At least one LLM endpoint
+- **Optional**:
+  - Lakebase (for L2 memory)
+  - Vector Search (for L2 RAG)
+  - Unity Catalog Volumes (for RAG documents)
+
+---
+
+## Documentation
+
+- **[UI Integration Guide](docs/UI_FRAMEWORK_INTEGRATION.md)** - Using official Databricks UI templates
+- **[App Templates Compliance](docs/APP_TEMPLATES_COMPLIANCE.md)** - Compatibility verification
+- **[Upstream Sync Strategy](docs/UPSTREAM_SYNC_STRATEGY.md)** - How we stay compatible
+
+---
+
+## FAQ
+
+**Q: Do I need to use Databricks?**
+A: For deployment, yes. For local development, you just need access to Databricks Model Serving endpoints.
+
+**Q: Can I use my own UI?**
+A: Absolutely! Your agent backend follows the OpenAI API standard, so any OpenAI-compatible UI works.
+
+**Q: What about LangChain/LangGraph?**
+A: Coming in v0.3.0+. For now, our agents use a simple, lightweight pattern. You can integrate LangChain yourself if needed.
+
+**Q: Is this production-ready?**
+A: Yes! L1 (chatbot) is production-ready in v0.2.0. L2 (assistant) is in active testing.
+
+**Q: How do I switch models?**
+A: Just edit `config.yaml` → `model.endpoint`. No code changes needed!
+
+**Q: Can I customize the agent logic?**
+A: Yes! Edit `agent.py` - it's your code, do whatever you want.
+
+**Q: How do I add custom tools/functions?**
+A: Modify the `predict()` method in `agent.py` to call your functions before/after the LLM.
+
+---
+
+## Roadmap
+
+### **v0.3.0** (Coming Soon)
+- [ ] `--ui=streamlit|gradio|react` flag for one-command UI integration
+- [ ] L3: API agents with custom tools
+- [ ] L4: Multi-step workflows
+- [ ] Template upgrade commands
+
+### **v0.4.0+** (Future)
+- [ ] L5: Multi-agent systems
+- [ ] LangGraph integration
+- [ ] Custom tool marketplace
+- [ ] Performance benchmarking
+
+---
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**Areas we'd love help with:**
+- Additional UI framework integrations
+- More example agents
+- Documentation improvements
+- Bug reports and feature requests
 
 ---
 
 ## Philosophy
 
-> **"Build ON TOP OF existing platforms, not INSTEAD OF"**
+**"On Top Of, Not Instead Of"**
 
-We don't replace LangGraph or LangChain.
-We make Databricks services easy to use with them.
+We don't reinvent wheels. We integrate official Databricks patterns:
+- ✅ Official app-templates for UI
+- ✅ OpenAI API standard
+- ✅ MLflow for tracing
+- ✅ FastAPI for servers
+- ✅ Databricks services for infrastructure
 
----
-
-## Installation
-
-```bash
-# Minimal (just integrations)
-pip install databricks-agent-toolkit
-
-# With Databricks services
-pip install databricks-agent-toolkit[databricks]
-
-# With agent frameworks (LangGraph, LangChain)
-pip install databricks-agent-toolkit[agent-frameworks]
-
-# With optimization (DSPy, TextGrad)
-pip install databricks-agent-toolkit[optimization]
-
-# Everything
-pip install databricks-agent-toolkit[all]
-```
+**We add:**
+- 🛠️ Scaffold generation (save time)
+- ⚙️ Configuration management (no code changes)
+- 📦 Pre-wired integrations (batteries included)
+- 📚 Best practices (production-ready)
 
 ---
 
-## 🤝 Contributing
-
-We welcome contributions! This toolkit is in active development (v0.1.3).
-
-**Priority areas:**
-- Complete scaffold generation (L1-L5)
-- Enhance Unity Catalog integration
-- Add more MCP examples
-- Improve deployment automation
-
----
-
-## 📄 License
+## License
 
 Apache 2.0
 
 ---
 
-## 🔗 Resources
+## Support
 
-- [Databricks Documentation](https://docs.databricks.com/)
-- [Databricks Managed MCP Servers](https://docs.databricks.com/generative-ai/mcp/)
-- [LangGraph](https://langchain-ai.github.io/langgraph/)
-- [MLflow 3 GenAI](https://mlflow.org/docs/latest/llms/index.html)
-
----
-
-## 🎉 What's Next?
-
-**v0.1.3 (Current Release):**
-- ✅ Core integrations (Model Serving, Unity Catalog, OAuth M2M auth)
-- ✅ L1 Chatbot scaffold (simple conversational AI)
-- ✅ L2 Assistant scaffold (memory + RAG)
-- ✅ RAG with pgvector + Databricks Vector Search
-- ✅ UC Volume auto-indexing
-- ✅ IVFFlat/HNSW configurable indexing
-- ✅ Scaffold validation system
-- ✅ MLflow 3 tracing (@mlflow.trace)
-- ✅ Databricks Apps deployment (OAuth M2M)
-
-**v0.2.0 (Next Release):**
-- L3-L5 scaffold generation (api, workflow, system)
-- MCP server integration for L4/L5
-- DSPy/TextGrad optimization workflows
-- Advanced monitoring & observability
-- Video tutorials
+- **GitHub Issues**: https://github.com/databricks/agent-toolkit/issues
+- **Documentation**: See `docs/` folder
+- **Examples**: See `examples/` folder
 
 ---
 
-**Built with ❤️  for the Databricks agent community**
+**Built with ❤️ for the Databricks community**
+
+Start building agents today:
+```bash
+pip install databricks-agent-toolkit
+dbat generate chatbot my-bot
+```
