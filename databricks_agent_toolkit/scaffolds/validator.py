@@ -76,62 +76,49 @@ class ScaffoldValidator:
                 self.errors.append(f"Missing required file: {file}")
 
     def _validate_chatbot(self):
-        """Validate chatbot-specific features"""
-        # Check for chatbot.py or app.py
+        """Validate chatbot-specific features (v0.2.0)"""
+        # Check for required files (agent.py + start_server.py or chatbot.py)
         has_cli = (self.path / "chatbot.py").exists()
-        has_app = (self.path / "app.py").exists()
+        has_agent = (self.path / "agent.py").exists()
+        has_server = (self.path / "start_server.py").exists()
 
-        if not (has_cli or has_app):
-            self.errors.append("Missing chatbot.py or app.py")
+        if not (has_cli or (has_agent and has_server)):
+            self.errors.append("Missing chatbot.py or (agent.py + start_server.py)")
 
-        # Check for MLflow tracing in implementation
-        if has_app:
+        # Check for MLflow tracing in agent
+        if has_agent:
             self._check_file_contains(
-                "app.py", ["mlflow.set_experiment", "auto_trace"], "MLflow tracing may not be configured in app.py"
+                "agent.py", ["mlflow.set_experiment", "auto_trace"], "MLflow tracing may not be configured in agent.py"
             )
 
     def _validate_assistant(self):
-        """Validate assistant-specific features"""
+        """Validate assistant-specific features (v0.2.0)"""
         # Check for required files
-        required = ["assistant.py", "app.py", "memory_manager.py"]
+        required = ["assistant.py", "agent.py", "start_server.py", "memory_manager.py"]
         for file in required:
             if not (self.path / file).exists():
                 self.errors.append(f"Missing required file for assistant: {file}")
 
-        # Check memory integration
-        if (self.path / "app.py").exists():
+        # Check memory integration in agent
+        if (self.path / "agent.py").exists():
             self._check_file_contains(
-                "app.py",
+                "agent.py",
                 ["MemoryManager", "memory.store_message", "memory.get_messages"],
-                "Memory integration may not be implemented in app.py",
+                "Memory integration may not be implemented in agent.py",
             )
 
-        # Check MLflow tracing (more thorough)
-        self._check_file_contains(
-            "app.py", ["mlflow.set_experiment", "auto_trace"], "MLflow tracing may not be configured"
-        )
-
-        # Check if DatabricksLLM actually uses tracing properly
-        # MLflow 3.x requires either mlflow.trace() decorator or proper span context
-        if (self.path / "app.py").exists():
-            app_content = (self.path / "app.py").read_text()
-
-            # Check if using async and proper MLflow context
-            if "async def chat" in app_content or "async def" in app_content:
-                # For async endpoints, MLflow tracing needs special handling
-                if "mlflow.trace" not in app_content and "@mlflow.trace" not in app_content:
-                    self.warnings.append(
-                        "Async endpoint detected but no @mlflow.trace decorator found. "
-                        "MLflow tracing may not work correctly in async Flask routes. "
-                        "Consider adding @mlflow.trace() decorator or ensuring DatabricksLLM "
-                        "logs traces independently."
-                    )
+        # Check MLflow tracing
+        if (self.path / "agent.py").exists():
+            self._check_file_contains(
+                "agent.py", ["mlflow.set_experiment", "auto_trace"], "MLflow tracing may not be configured"
+            )
 
         # Check RAG support
         if (self.path / "rag_manager.py").exists():
-            self._check_file_contains(
-                "app.py", ["RAGManager", "rag.retrieve"], "RAG integration may not be implemented"
-            )
+            if (self.path / "agent.py").exists():
+                self._check_file_contains(
+                    "agent.py", ["RAGManager", "rag.retrieve"], "RAG integration may not be implemented"
+                )
 
             # Validate RAG manager has UC Volume support
             self._check_file_contains(

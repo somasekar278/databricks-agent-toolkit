@@ -1,0 +1,4 @@
+# Last known commit from databricks/app-templates
+# This file is auto-updated by .github/workflows/monitor-app-templates.yml
+# Initial baseline - will be updated on first run
+initial
