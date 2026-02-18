@@ -30,8 +30,8 @@ Create a Lakebase instance in Databricks:
    - Host: `ep-xxx.database.[region].cloud.databricks.com` (Autoscale)
    - Database: `agents`
    - Username and password
-   - User: `REDACTED`
-   - Password: `REDACTED`
+   - User: `your-user`
+   - Password: `your-password`
 
 See [Databricks Lakebase docs](https://docs.databricks.com/lakebase/) for details.
 
@@ -46,13 +46,13 @@ pip install -r requirements.txt
 ```bash
 # Databricks
 export DATABRICKS_HOST="https://your-workspace.cloud.databricks.com"
-export DATABRICKS_TOKEN="REDACTED"
+export DATABRICKS_TOKEN="your-token"
 
 # Lakebase
 export LAKEBASE_HOST="your-instance.lakebase.databricks.com"
 export LAKEBASE_DATABASE="agents"
-export LAKEBASE_USER="REDACTED"
-export LAKEBASE_PASSWORD="REDACTED"
+export LAKEBASE_USER="your-user"
+export LAKEBASE_PASSWORD="your-password"
 ```
 
 ### 4. Run Locally
@@ -368,8 +368,8 @@ Edit `databricks.yml` or set variables:
 ```bash
 export TF_VAR_lakebase_host="your-instance.cloud.databricks.com"
 export TF_VAR_lakebase_database="agents"
-export TF_VAR_lakebase_user="REDACTED"
-export TF_VAR_lakebase_password="REDACTED"
+export TF_VAR_lakebase_user="your-user"
+export TF_VAR_lakebase_password="your-password"
 ```
 
 **2. Deploy with bundle**

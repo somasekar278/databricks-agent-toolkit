@@ -36,10 +36,10 @@ def get_workspace_client(
         # Auto-detect authentication
         w = get_workspace_client()
 
-        # Use specific credentials
+        # Use explicit credentials (prefer env DATABRICKS_HOST / DATABRICKS_TOKEN)
         w = get_workspace_client(
             host="https://workspace.cloud.databricks.com",
-            token="REDACTED"
+            token=os.environ.get("DATABRICKS_TOKEN")
         )
 
         # Use CLI profile
@@ -82,16 +82,15 @@ def get_auth_help() -> str:
 
     1. Environment Variables (recommended for production):
        export DATABRICKS_HOST="https://your-workspace.cloud.databricks.com"
-       export DATABRICKS_TOKEN="REDACTED"
+       export DATABRICKS_TOKEN="<your-token>"  # From workspace Settings > Developer > Access tokens
 
     2. Databricks CLI (recommended for development):
        databricks auth login --host https://your-workspace.cloud.databricks.com
 
-    3. Explicit credentials in code:
-       from databricks_agent_toolkit.integrations import get_workspace_client
+    3. Explicit credentials in code (avoid; use env vars):
        w = get_workspace_client(
-           host="https://your-workspace.cloud.databricks.com",
-           token="REDACTED"
+           host=os.environ["DATABRICKS_HOST"],
+           token=os.environ["DATABRICKS_TOKEN"]
        )
 
     For more info: https://docs.databricks.com/en/dev-tools/auth.html

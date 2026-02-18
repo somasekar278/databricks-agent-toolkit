@@ -1,0 +1,139 @@
+# Databricks Asset Bundle (DAB) for RAG Pipeline
+# Complete setup: UC Volume → Ingestion Job → Delta → Synced Table → Lakebase
+
+bundle:
+  name: {{ name }}_rag
+
+resources:
+  # 1. UC Volume for storing raw documents
+  volumes:
+    {{ name }}_docs:
+      name: {{ name }}_docs
+      catalog_name: main
+      schema_name: default
+      volume_type: MANAGED
+
+  # 2. Data Ingestion Job (Nightly)
+  jobs:
+    {{ name }}_ingestion:
+      name: "{{ name }}_ingestion"
+      description: "Nightly job to ingest documents from UC Volume to Delta with embeddings"
+      
+      tasks:
+        - task_key: ingest_documents
+          spark_python_task:
+            python_file: data_ingestion_job.py
+          
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 2
+            spark_conf:
+              "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+          
+          libraries:
+            - pypi:
+                package: "mlflow>=2.21.2"
+      
+      # Schedule: Configurable via variables
+      schedule:
+        quartz_cron_expression: "${var.ingestion_schedule}"
+        timezone_id: "${var.ingestion_timezone}"
+        pause_status: "${var.ingestion_pause_status}"
+      
+      # Job parameters
+      parameters:
+        - name: uc_volume_path
+          default: "/Volumes/main/default/{{ name }}_docs"
+        - name: delta_table
+          default: "main.default.{{ name }}_embeddings"
+        - name: embedding_model
+          default: "databricks-bge-large-en"
+        - name: chunk_size
+          default: "512"
+        - name: chunk_overlap
+          default: "50"
+      
+      # Email notifications
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.userName}
+
+  # 3. Database Catalog (Maps existing Lakebase to Unity Catalog)
+  # Note: Assumes user has an existing Lakebase Provisioned instance
+  database_catalogs:
+    {{ name }}_catalog:
+      database_instance_name: ${var.lakebase_instance_name}
+      database_name: ${var.lakebase_database_name}
+      name: "{{ name }}_lakebase_catalog"
+      create_database_if_not_exists: true
+
+  # 4. Synced Table (Delta → Lakebase)
+  synced_database_tables:
+    {{ name }}_embeddings_sync:
+      name: ${resources.database_catalogs.{{ name }}_catalog.name}.${var.lakebase_database_name}.embeddings
+      database_instance_name: ${var.lakebase_instance_name}
+      logical_database_name: ${var.lakebase_database_name}
+      spec:
+        source_table_full_name: "main.default.{{ name }}_embeddings"
+        scheduling_policy: CONTINUOUS  # Continuous sync from Delta
+        primary_key_columns:
+          - id
+        create_database_objects_if_missing: true
+        new_pipeline_spec:
+          storage_catalog: "main"
+          storage_schema: "default"
+
+  # 6. RAG App (Streamlit)
+  apps:
+    {{ name }}:
+      name: {{ name }}
+      description: "RAG chatbot with Lakebase pgvector"
+      source_code_path: .
+      permissions:
+        - level: CAN_MANAGE
+          user_name: ${workspace.current_user.userName}
+
+# Variables - Customize these in config.yaml or pass via --var
+variables:
+  # Existing Lakebase Instance (user-provided; set via --var or config; never commit real values)
+  lakebase_instance_name:
+    description: "Name of your existing Lakebase Provisioned instance"
+    default: ""
+  
+  lakebase_database_name:
+    description: "Database name in your Lakebase instance"
+    default: "rag_db"
+  
+  # Ingestion job schedule
+  ingestion_schedule:
+    description: "Cron expression for ingestion job schedule"
+    default: "0 0 0 * * ?"  # Daily at midnight UTC
+  
+  ingestion_timezone:
+    description: "Timezone for ingestion job"
+    default: "UTC"
+  
+  ingestion_pause_status:
+    description: "Initial pause status (PAUSED or UNPAUSED)"
+    default: "PAUSED"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    
+    # Dev: Start paused by default
+    variables:
+      ingestion_pause_status: "PAUSED"
+  
+  prod:
+    mode: production
+    workspace:
+      root_path: /Shared/.bundle/${bundle.name}/${bundle.target}
+    
+    # Prod: Auto-run by default
+    variables:
+      ingestion_pause_status: "UNPAUSED"

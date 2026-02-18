@@ -44,10 +44,13 @@ def main():
 Examples:
   # WORKFLOW: Generate → Deploy → Run → View
 
-  # 1. Generate chatbot with Streamlit UI (default)
+  # L1: Generate chatbot with Streamlit UI (default)
   dat generate chatbot my-bot
 
-  # 2. Deploy to Databricks
+  # L2: Generate RAG chatbot with Lakebase pgvector
+  dat generate rag-chatbot my-docs --vector-store lakebase
+
+  # Deploy to Databricks
   cd my-bot && databricks bundle deploy && databricks bundle run
 
   # L1 Chatbot - All UI frameworks supported
@@ -77,7 +80,9 @@ For more info: https://github.com/databricks/databricks-agent-toolkit
 
     # Generate command
     generate_parser = subparsers.add_parser("generate", help="Generate agent scaffolds")
-    generate_parser.add_argument("level", choices=["chatbot"], help="Agent type to generate")
+    generate_parser.add_argument(
+        "level", choices=["chatbot", "rag-chatbot"], help="Agent type to generate (chatbot or rag-chatbot)"
+    )
     generate_parser.add_argument("name", help="Agent name")
     generate_parser.add_argument(
         "--model",
@@ -85,7 +90,10 @@ For more info: https://github.com/databricks/databricks-agent-toolkit
         help="Model endpoint name (default: databricks-claude-sonnet-4)",
     )
     generate_parser.add_argument(
-        "--enable-rag", action="store_true", help="Enable RAG capabilities (L2 assistant only)"
+        "--vector-store",
+        choices=["lakebase", "databricks"],
+        default="lakebase",
+        help="Vector store for RAG (rag-chatbot only): lakebase (pgvector) or databricks (Vector Search)",
     )
     generate_parser.add_argument(
         "--ui",
@@ -147,8 +155,18 @@ def handle_generate(args):
     print(f"   Model: {args.model}")
     streaming_status = "✅ streaming" if args.ui == "streamlit" else "⚠️  batch only"
     print(f"   UI: {args.ui} ({streaming_status})")
-    if hasattr(args, "enable_rag") and args.enable_rag:
-        print("   RAG: enabled")
+
+    # Check if this is RAG chatbot
+    is_rag = args.level == "rag-chatbot"
+    if is_rag:
+        vector_store = getattr(args, "vector_store", "lakebase")
+        print(f"   RAG: enabled (vector store: {vector_store})")
+
+        # RAG only supports Streamlit for now
+        if args.ui != "streamlit":
+            print("\n❌ rag-chatbot requires Streamlit UI (only Streamlit supports RAG integration)")
+            print("   Use: dat generate rag-chatbot my-docs --ui streamlit")
+            sys.exit(1)
 
     try:
         generator = ScaffoldGenerator()
@@ -159,23 +177,37 @@ def handle_generate(args):
             "ui": args.ui,
         }
 
-        # Add RAG option if specified (L2 only)
-        if hasattr(args, "enable_rag") and args.enable_rag:
+        # Add RAG option if rag-chatbot level
+        if is_rag:
             options["enable_rag"] = True
+            options["vector_store"] = getattr(args, "vector_store", "lakebase")
+
+        # Map rag-chatbot to chatbot level with enable_rag flag
+        actual_level = "chatbot" if args.level == "rag-chatbot" else args.level
 
         generator.generate(
-            level=args.level,
+            level=actual_level,
             name=args.name,
             output_dir=output_dir,
             options=options,
         )
         print("\n✅ Generated successfully!")
         print("\n📋 Next steps:")
-        print(f"   1. Test locally:   dat test {output_dir}")
-        print(f"   2. Deploy:         cd {output_dir} && databricks bundle deploy")
-        print("   3. Run:            databricks bundle run")
-        print("   4. View:           Check Databricks Apps UI")
-        print(f"\n📖 See {output_dir}/README.md for details")
+        
+        if is_rag:
+            # RAG-specific workflow
+            print(f"   1. Deploy:         cd {output_dir} && databricks bundle deploy -t dev")
+            print(f"   2. Upload docs:    See {output_dir}/RAG_COMPLETE_GUIDE.md for details")
+            print(f"   3. Run job:        databricks bundle run -t dev {args.name}_ingestion")
+            print(f"   4. View app:       databricks apps get {args.name}")
+            print(f"\n📖 Full guide: {output_dir}/RAG_COMPLETE_GUIDE.md")
+        else:
+            # Standard chatbot workflow
+            print(f"   1. Test locally:   dat test {output_dir}")
+            print(f"   2. Deploy:         cd {output_dir} && databricks bundle deploy -t dev")
+            print(f"   3. Run app:        databricks bundle run -t dev {args.name}")
+            print(f"   4. View:           Check Databricks Apps UI")
+            print(f"\n📖 See {output_dir}/README.md for details")
     except Exception as e:
         print(f"\n❌ Error: {e}")
 

@@ -1,0 +1,251 @@
+"""
+Generate sample document files for testing the RAG pipeline.
+
+Creates sample .txt files that can be uploaded to UC Volume to test:
+1. UC Volume → 2. Ingestion Job → 3. Delta → 4. Synced Table → 5. Lakebase → 6. RAG App
+
+Run this to create sample docs, then upload them to the UC Volume.
+"""
+
+import os
+from pathlib import Path
+
+
+# Sample documents about Databricks features
+SAMPLE_DOCUMENTS = {
+    "databricks_overview.txt": """
+Databricks: Unified Data Analytics Platform
+
+Databricks is a unified data analytics platform built on Apache Spark. It was founded by the 
+original creators of Apache Spark and provides a collaborative environment for data scientists, 
+data engineers, and business analysts.
+
+Key features include:
+- Collaborative notebooks with real-time co-authoring
+- Automated cluster management and auto-scaling
+- Production job scheduling and monitoring
+- Integration with popular data sources and BI tools
+- Enterprise-grade security and compliance
+- Unity Catalog for unified data governance
+
+Databricks runs on major cloud providers including AWS, Azure, and Google Cloud Platform, 
+allowing organizations to leverage their existing cloud infrastructure while gaining the 
+benefits of a unified analytics platform.
+""",
+    
+    "delta_lake.txt": """
+Delta Lake: Reliable Data Lakes
+
+Delta Lake is an open-source storage framework that brings ACID transactions to Apache Spark 
+and big data workloads. It provides a robust foundation for building data lakes with reliability 
+and performance.
+
+Core Capabilities:
+1. ACID Transactions: Ensures data consistency across concurrent reads and writes
+2. Time Travel: Query and restore previous versions of data
+3. Schema Enforcement: Prevents bad data from corrupting your data lake
+4. Unified Batch and Streaming: Single source of truth for both batch and streaming workloads
+5. Scalable Metadata Handling: Handles petabyte-scale tables with billions of files
+
+Delta Lake is compatible with Apache Spark APIs and can be used as a drop-in replacement for 
+Parquet tables. It's the foundation for the Databricks Lakehouse architecture.
+
+Use cases include:
+- Building reliable data pipelines
+- Ensuring data quality in data lakes
+- Simplifying CDC (Change Data Capture) workflows
+- Enabling real-time analytics on data lakes
+""",
+    
+    "mlflow.txt": """
+MLflow: Open Source Platform for the Machine Learning Lifecycle
+
+MLflow is an open-source platform for managing the end-to-end machine learning lifecycle. 
+It was developed by Databricks and donated to the Linux Foundation for vendor-neutral governance.
+
+Four Main Components:
+
+1. MLflow Tracking
+   - Log parameters, metrics, and artifacts
+   - Compare experiment runs
+   - Track model training iterations
+
+2. MLflow Projects
+   - Package ML code in a reusable format
+   - Ensure reproducibility across environments
+   - Share projects with team members
+
+3. MLflow Models
+   - Deploy models to diverse serving platforms
+   - Support multiple ML frameworks (scikit-learn, PyTorch, TensorFlow, etc.)
+   - Standardized model format
+
+4. MLflow Model Registry
+   - Centralized model store
+   - Model versioning and stage transitions
+   - Collaborative model management
+   - Model lineage tracking
+
+MLflow integrates seamlessly with Databricks and provides native support for major ML frameworks. 
+It helps data science teams collaborate more effectively and deploy models to production faster.
+""",
+    
+    "unity_catalog.txt": """
+Unity Catalog: Unified Governance for Data and AI
+
+Unity Catalog is a unified governance solution for data and AI assets on the Databricks platform. 
+It provides a single place to administer and audit data access across all Databricks workspaces.
+
+Key Features:
+
+Data Governance:
+- Centralized access control for tables, views, and files
+- Fine-grained permissions at database, table, and column levels
+- Attribute-based access control (ABAC)
+- Row-level and column-level security
+
+Auditing and Compliance:
+- Comprehensive audit logs for data access
+- Built-in data lineage tracking
+- Integration with external audit tools
+- Compliance with GDPR, HIPAA, and other regulations
+
+Data Discovery:
+- Search across all data assets
+- Automated data profiling
+- Business-friendly metadata and tags
+- Collaborative data documentation
+
+Multi-Cloud and Cross-Workspace:
+- Single governance model across AWS, Azure, and GCP
+- Share data across workspaces and regions
+- Delta Sharing for secure data sharing with external organizations
+
+Unity Catalog represents a fundamental shift in how organizations manage and govern their data, 
+providing enterprise-grade governance while maintaining the flexibility and performance of the 
+Databricks platform.
+""",
+    
+    "vector_search.txt": """
+Databricks Vector Search: Production RAG at Scale
+
+Databricks Vector Search is a fully managed, serverless vector database that enables organizations 
+to build production-ready Retrieval Augmented Generation (RAG) applications at scale.
+
+Architecture:
+
+1. Delta Sync Indexes
+   - Automatically syncs with Delta tables
+   - Real-time updates as source data changes
+   - Support for both Databricks-managed and self-managed embeddings
+
+2. HNSW Algorithm
+   - Uses Hierarchical Navigable Small World (HNSW) for fast approximate nearest neighbor search
+   - L2 distance metric for measuring vector similarity
+   - Sub-millisecond query latency at scale
+
+3. Hybrid Search
+   - Combines vector-based semantic search with keyword-based search
+   - Uses Okapi BM25 for keyword relevance scoring
+   - Reciprocal Rank Fusion (RRF) to merge results
+
+Key Features:
+- Serverless architecture with auto-scaling
+- Support for billions of vectors
+- Built-in access control and security
+- Integration with Unity Catalog for governance
+- Real-time synchronization from Delta tables
+- Metadata filtering for fine-grained queries
+
+Use Cases:
+- Semantic search over documents and knowledge bases
+- Recommendation systems
+- Image and video similarity search
+- Question answering systems
+- Customer support chatbots
+
+Databricks Vector Search simplifies the development of RAG applications by handling the 
+infrastructure complexity, allowing teams to focus on building intelligent applications.
+""",
+    
+    "lakehouse_architecture.txt": """
+The Databricks Lakehouse: Best of Data Warehouses and Data Lakes
+
+The Lakehouse architecture represents a paradigm shift in data platform design, combining the 
+best features of data warehouses and data lakes into a single, unified platform.
+
+Traditional Challenges:
+
+Data Lakes:
+- Cost-effective storage
+- Support for all data types
+- BUT: Lack of ACID transactions and poor performance for BI queries
+
+Data Warehouses:
+- High performance for SQL queries
+- ACID transactions and strong consistency
+- BUT: Expensive, rigid schemas, limited to structured data
+
+Lakehouse Solution:
+
+Storage Layer:
+- Delta Lake provides ACID transactions on cloud object storage
+- Cost-effective storage like data lakes
+- Support for structured, semi-structured, and unstructured data
+
+Metadata Layer:
+- Unity Catalog for unified governance
+- Schema enforcement and evolution
+- Audit logging and lineage tracking
+
+Processing Layer:
+- Apache Spark for batch and streaming
+- Photon engine for accelerated SQL queries
+- Support for Python, R, SQL, and Scala
+
+Benefits:
+1. Simplified Architecture: Single platform for all data workloads
+2. Cost Efficiency: Cloud object storage with compute-storage separation
+3. Improved Performance: Delta Lake optimizations and Photon acceleration
+4. Better Governance: Unified metadata and access control
+5. Flexibility: Support for all data types and workload types
+6. Real-time Analytics: Streaming and batch on the same platform
+
+The Lakehouse architecture has been adopted by thousands of organizations worldwide, enabling 
+them to break down data silos and democratize access to data and AI.
+""",
+}
+
+
+def generate_sample_documents(output_dir: str = "./sample_docs"):
+    """
+    Generate sample document files.
+    
+    Args:
+        output_dir: Directory to save sample documents (default: ./sample_docs)
+    """
+    # Create output directory
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True)
+    
+    print(f"📝 Generating sample documents in: {output_path}\n")
+    
+    # Write each document to a file
+    for filename, content in SAMPLE_DOCUMENTS.items():
+        file_path = output_path / filename
+        file_path.write_text(content.strip())
+        print(f"✅ Created: {filename} ({len(content)} chars)")
+    
+    print(f"\n🎉 Generated {len(SAMPLE_DOCUMENTS)} sample documents")
+    print(f"\n📋 Next steps:")
+    print(f"   1. Upload to UC Volume:")
+    print(f"      databricks fs cp {output_dir}/*.txt dbfs:/Volumes/main/default/{{ name }}_docs/")
+    print(f"   2. Or use Databricks UI: Catalog → Volumes → Upload Files")
+    print(f"   3. Run ingestion job to process documents")
+    print(f"   4. Test RAG queries!")
+    
+    return output_path
+
+
+if __name__ == "__main__":
+    generate_sample_documents()

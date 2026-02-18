@@ -1,0 +1,420 @@
+# {{ name }} - Complete RAG Setup Guide
+
+**Official Databricks RAG Pattern**  
+Complete production-ready setup following Databricks best practices.
+
+---
+
+## 🏗️ Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│              OFFICIAL DATABRICKS RAG PIPELINE                     │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                   │
+│  1. UC Volume (Raw Documents)                                    │
+│     /Volumes/main/default/{{ name }}_docs/                      │
+│     - Upload PDFs, TXT, MD, DOCX                                │
+│           ↓                                                       │
+│  2. Data Ingestion Job (Nightly via DABs)                       │
+│     - Watches UC Volume for new files                            │
+│     - ai_parse() for intelligent chunking                        │
+│     - FMAPI embeddings (databricks-bge-large-en)               │
+│     - Stores in Delta table                                      │
+│           ↓                                                       │
+│  3. Delta Table (Embeddings Storage)                            │
+│     main.default.{{ name }}_embeddings                          │
+│     Columns: id, content, embedding, metadata                    │
+│     CDF enabled for auto-sync                                    │
+│           ↓                                                       │
+│  4. Synced Table (Delta → Lakebase)                             │
+│     Databricks auto-syncs continuously                           │
+│           ↓                                                       │
+│  5. Lakebase (pgvector with HNSW index)                        │
+│     Fast vector similarity search                                │
+│           ↓                                                       │
+│  6. RAG App (Streamlit + Model Serving)                         │
+│     User query → Retrieval → Context → LLM → Response           │
+│                                                                   │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+**References**:
+- [Delta-to-Lakebase Sync](https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table)
+- [ai_parse() Function](https://docs.databricks.com/sql/language-manual/functions/ai_parse.html)
+- [Foundation Model APIs](https://docs.databricks.com/machine-learning/foundation-models/index.html)
+
+---
+
+## ⚡ Quick Test (Skip Full Pipeline)
+
+Want to test RAG immediately without the full pipeline? Use this shortcut:
+
+```bash
+# 1. Deploy just the app (skip Lakebase, job, etc.)
+databricks bundle deploy -t dev --resources apps
+
+# 2. Populate Lakebase directly with sample data
+python setup_sample_data.py
+
+# 3. Test RAG queries immediately
+databricks bundle run {{ name }}
+```
+
+**Use case**: Quick proof-of-concept, demo, or local testing
+
+**⚠️ Note**: This bypasses the production pipeline (UC Volume → Ingestion → Delta → Synced Table)
+
+---
+
+## 🚀 Complete Production Setup (5 Steps)
+
+### **Step 1: Deploy Complete Infrastructure via DABs**
+
+```bash
+# Deploy everything: UC Volume, Lakebase, Synced Table, Job, and App
+databricks bundle deploy -t dev
+
+# Verify deployment
+databricks bundle resources list
+```
+
+**Creates** (All via Single DAB Deploy):
+- ✅ UC Volume: `/Volumes/main/default/{{ name }}_docs`
+- ✅ Lakebase Instance: `{{ name }}-lakebase` (Provisioned, CU_1)
+- ✅ Database Catalog: `{{ name }}_lakebase_catalog` (Unity Catalog mapping)
+- ✅ Synced Table: Auto-syncs Delta → Lakebase continuously
+- ✅ Ingestion Job: `{{ name }}_ingestion` (paused initially)
+- ✅ RAG App: `{{ name }}` (Streamlit)
+
+---
+
+### **Step 2: Upload Documents to UC Volume**
+
+#### **Option A: Use Sample Documents (Quick Testing)**
+
+```bash
+# Generate 6 sample documents about Databricks
+python generate_sample_docs.py
+
+# Upload to UC Volume via CLI
+databricks fs cp ./sample_docs/*.txt dbfs:/Volumes/main/default/{{ name }}_docs/
+
+# Or via UI: Catalog → Volumes → Upload Files
+```
+
+**Sample docs include**: Databricks Overview, Delta Lake, MLflow, Unity Catalog, Vector Search, Lakehouse Architecture
+
+#### **Option B: Upload Your Own Documents**
+
+```bash
+# Via Databricks CLI
+databricks fs cp ./my_docs/*.pdf dbfs:/Volumes/main/default/{{ name }}_docs/
+
+# Via Python (in Databricks notebook)
+import shutil
+shutil.copy("local_file.pdf", "/Volumes/main/default/{{ name }}_docs/")
+
+# Via UI: Catalog → Volumes → {{ name }}_docs → Upload
+```
+
+**Supported formats**: PDF, TXT, MD, DOC, DOCX
+
+#### **Option C: Programmatic Upload (Python)**
+
+```python
+from databricks.sdk import WorkspaceClient
+from pathlib import Path
+
+w = WorkspaceClient()
+volume_path = "/Volumes/main/default/{{ name }}_docs"
+
+# Upload all files from local directory
+for file in Path("./my_docs").glob("*.*"):
+    w.files.upload(f"{volume_path}/{file.name}", file.read_bytes())
+    print(f"✅ Uploaded: {file.name}")
+```
+
+---
+
+### **Step 3: Run Ingestion Job**
+
+```bash
+# Run ingestion job once to process initial documents
+databricks jobs run-now $(databricks jobs list | grep "{{ name }}_ingestion" | awk '{print $1}')
+
+# Monitor job progress
+databricks jobs list-runs --job-id <job-id>
+```
+
+**What happens**:
+1. ✅ Reads documents from UC Volume
+2. ✅ Chunks with `ai_parse()` (intelligent, structure-aware)
+3. ✅ Generates embeddings (Databricks BGE-large model)
+4. ✅ Stores in Delta table: `main.default.{{ name }}_embeddings`
+
+**Verify**:
+```sql
+-- Check Delta table
+SELECT COUNT(*) as total_chunks,
+       COUNT(DISTINCT file_path) as total_docs
+FROM main.default.{{ name }}_embeddings;
+
+-- Sample embeddings
+SELECT id, content, array_size(embedding) as embedding_dim
+FROM main.default.{{ name }}_embeddings
+LIMIT 5;
+```
+
+---
+
+### **Step 4: Verify Synced Table (Delta → Lakebase)**
+
+✅ **Synced Table is automatically created by DABs!** (Step 1)
+
+```bash
+# Check sync status
+databricks synced-tables get {{ name }}_lakebase_catalog.rag_db.embeddings
+
+# Watch sync progress (wait for "ONLINE" status)
+databricks synced-tables get {{ name }}_lakebase_catalog.rag_db.embeddings --output json | jq '.data_synchronization_status.detailed_state'
+```
+
+**What happens**:
+1. ✅ Creates Synced Table pointing to Delta
+2. ✅ Auto-syncs to Lakebase continuously
+3. ✅ Creates pgvector index (HNSW) in Lakebase
+4. ✅ Keeps Lakebase in sync with Delta changes
+
+**Verify**:
+```sql
+-- Query via Unity Catalog (no direct Lakebase connection needed!)
+SELECT COUNT(*) FROM {{ name }}_lakebase_catalog.rag_db.embeddings;
+
+-- Sample embeddings
+SELECT id, content, cardinality(embedding) as embedding_dim
+FROM {{ name }}_lakebase_catalog.rag_db.embeddings
+LIMIT 5;
+```
+
+**Or connect directly to Lakebase**:
+```sql
+-- Use Lakebase connection string from Databricks UI
+SELECT COUNT(*) FROM embeddings;
+
+-- Test vector search
+SELECT content, 
+       embedding <=> '[0.1, 0.2, ...]'::vector as similarity
+FROM embeddings
+ORDER BY similarity
+LIMIT 5;
+```
+
+---
+
+### **Step 5: Deploy and Test RAG App**
+
+```bash
+# Start the RAG app
+databricks bundle run {{ name }}
+
+# Get app URL
+databricks apps get {{ name }}
+```
+
+**Test queries**:
+- "What does this document say about X?"
+- "Summarize the key points about Y"
+- "Explain the concept of Z mentioned in the docs"
+
+---
+
+## ⏰ Customize Ingestion Schedule
+
+### **Option 1: Edit config.yaml (Recommended)**
+
+```yaml
+# config.yaml
+rag:
+  ingestion:
+    schedule:
+      cron: "0 0 2 * * ?"  # Run at 2 AM daily
+      timezone: "America/Los_Angeles"  # Your timezone
+      pause_on_deploy: false  # Auto-enable on deploy
+```
+
+Then redeploy:
+```bash
+databricks bundle deploy
+```
+
+### **Option 2: Override via CLI**
+
+```bash
+# Deploy with custom schedule
+databricks bundle deploy \
+  --var="ingestion_schedule=0 0 6 * * ?" \
+  --var="ingestion_timezone=America/New_York" \
+  --var="ingestion_pause_status=UNPAUSED"
+```
+
+### **Option 3: Manually enable/disable**
+
+```bash
+# Enable the job
+databricks jobs update <job-id> --pause-status UNPAUSED
+
+# Disable the job
+databricks jobs update <job-id> --pause-status PAUSED
+```
+
+### **Common Schedules**
+
+| Schedule | Cron Expression | Description |
+|----------|----------------|-------------|
+| Daily at midnight | `0 0 0 * * ?` | Every day at 00:00 |
+| Daily at 2 AM | `0 0 2 * * ?` | Every day at 02:00 |
+| Every 6 hours | `0 0 */6 * * ?` | 00:00, 06:00, 12:00, 18:00 |
+| Weekly on Monday | `0 0 0 * * MON` | Every Monday at 00:00 |
+| Monthly on 1st | `0 0 0 1 * ?` | 1st of month at 00:00 |
+| Weekdays at 9 AM | `0 0 9 * * MON-FRI` | Mon-Fri at 09:00 |
+
+**Workflow**:
+1. 📂 Users upload new docs to UC Volume anytime
+2. ⏰ Job runs on configured schedule
+3. 🔄 Processes new documents → Delta
+4. 🔄 Synced Table auto-syncs → Lakebase
+5. ✅ New docs available in RAG app
+
+---
+
+## 📊 Configuration
+
+### **config.yaml** (Customize as needed)
+
+```yaml
+rag:
+  ingestion:
+    uc_volume_path: "/Volumes/main/default/{{ name }}_docs"
+    delta_table: "main.default.{{ name }}_embeddings"
+    
+    # Schedule configuration (Quartz Cron format)
+    schedule:
+      cron: "0 0 0 * * ?"  # Daily at midnight UTC
+      timezone: "UTC"
+      pause_on_deploy: true
+    
+    # Common schedules:
+    # "0 0 0 * * ?"     - Daily at midnight
+    # "0 0 2 * * ?"     - Daily at 2 AM
+    # "0 0 0 * * MON"   - Weekly on Monday
+    # "0 0 0 1 * ?"     - Monthly on 1st
+    # "0 0 */6 * * ?"   - Every 6 hours
+  
+  lakebase:
+    host: "${LAKEBASE_HOST}"
+    database: "${LAKEBASE_DATABASE}"
+    table: "embeddings"
+    top_k: 5
+    index_type: "hnsw"  # HNSW (Databricks standard) or ivfflat
+  
+  embedding:
+    endpoint: "databricks-bge-large-en"
+    dimension: 1024
+  
+  chunking:
+    chunk_size: 512
+    overlap: 50
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### **Issue: Ingestion job fails**
+```bash
+# Check job logs
+databricks jobs list-runs --job-id <job-id> --limit 1
+databricks jobs get-run <run-id>
+
+# Common causes:
+# - UC Volume path incorrect
+# - Permissions on UC Volume
+# - Embedding model endpoint unavailable
+```
+
+### **Issue: Synced table not syncing**
+```bash
+# Check sync status
+databricks synced-tables get main.default.{{ name }}_embeddings_synced
+
+# Common causes:
+# - Delta table doesn't have CDF enabled
+# - Lakebase instance not accessible
+# - Primary key constraint violation
+```
+
+### **Issue: No results from vector search**
+```sql
+-- Check if embeddings exist in Lakebase
+SELECT COUNT(*) FROM embeddings;
+
+-- Check embedding dimensions
+SELECT array_length(embedding, 1) FROM embeddings LIMIT 1;
+-- Should be 1024 for BGE-large
+```
+
+---
+
+## 📈 Monitoring
+
+### **Ingestion Job Metrics**
+- **Databricks UI** → Workflows → Jobs → `{{ name }}_ingestion`
+- Monitor: Documents processed, embeddings generated, failures
+
+### **Synced Table Status**
+```bash
+# Check sync lag and status
+databricks synced-tables get main.default.{{ name }}_embeddings_synced
+```
+
+### **RAG App Logs**
+```bash
+# View app logs
+databricks apps logs {{ name }} --follow
+
+# Look for:
+# - "✅ RAG initialized (Lakebase pgvector)"
+# - "📚 Retrieved X relevant documents"
+```
+
+---
+
+## 🎯 Next Steps
+
+1. ✅ **Production Deployment**:
+   ```bash
+   databricks bundle deploy -t prod
+   ```
+
+2. ✅ **Custom Chunking**: Adjust `chunk_size` and `overlap` in config.yaml
+
+3. ✅ **Different Embedding Model**: Try `databricks-gte-large-en` or custom model
+
+4. ✅ **Add More Documents**: Just upload to UC Volume, job handles rest
+
+5. ✅ **Monitor Costs**: Check Databricks usage dashboard for embedding API calls
+
+---
+
+## 📚 Additional Resources
+
+- [Databricks Vector Search](https://docs.databricks.com/aws/en/vector-search/vector-search)
+- [Delta Live Tables](https://docs.databricks.com/delta-live-tables/index.html)
+- [Foundation Model APIs](https://docs.databricks.com/machine-learning/foundation-models/index.html)
+- [Unity Catalog Volumes](https://docs.databricks.com/connect/unity-catalog/volumes.html)
+- [ai_parse() Documentation](https://docs.databricks.com/sql/language-manual/functions/ai_parse.html)
+
+---
+
+**Questions?** Check the troubleshooting section or run `databricks bundle validate` to check configuration.

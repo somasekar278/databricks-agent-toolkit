@@ -1,0 +1,227 @@
+# {{ name }} - RAG Setup Guide
+
+Complete guide for setting up RAG with Lakebase pgvector following official Databricks patterns.
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    OFFICIAL DATABRICKS PATTERN                   │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Unity Catalog (Delta Table)                                    │
+│         ↓                                                        │
+│  Delta Live Tables (DLT) Pipeline                               │
+│    - Generate embeddings (Databricks BGE)                       │
+│    - Auto-sync to Lakebase (Change Data Feed)                  │
+│         ↓                                                        │
+│  Lakebase (pgvector with HNSW index)                           │
+│         ↓                                                        │
+│  RAG Query Flow:                                                │
+│    1. User query → Embedding                                    │
+│    2. Vector search → Retrieve docs                             │
+│    3. Context augmentation → LLM                                │
+│    4. Stream response → User                                    │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Reference**: [Databricks Delta-to-Lakebase Sync](https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table)
+
+---
+
+## 🚀 Quick Start (3 Options)
+
+### **Option 1: Sample Data (Fastest - For Testing)**
+
+```bash
+# Populate Lakebase with 5 sample Databricks documents
+python setup_sample_data.py
+
+# Deploy and test
+databricks bundle deploy
+databricks bundle run
+```
+
+**Use case**: Quick testing, demos, development
+
+---
+
+### **Option 2: Delta Live Tables Sync (Recommended - Production)**
+
+**Step 1: Prepare your Delta table**
+```sql
+-- Enable Change Data Feed (required for sync)
+ALTER TABLE catalog.schema.your_documents 
+SET TBLPROPERTIES (delta.enableChangeDataFeed = true);
+```
+
+**Step 2: Configure DLT pipeline**
+```bash
+# Edit dlt_pipeline_config.yml - set variables via --var or env; never commit real credentials
+variables:
+  source_table: "catalog.schema.your_documents"
+  content_column: "text"
+  # lakebase_*: set via bundle vars or Databricks secrets
+```
+
+**Step 3: Deploy DLT pipeline**
+```bash
+databricks bundle deploy -t dlt_sync
+databricks pipelines start {{ name }}_dlt_sync
+```
+
+**Step 4: Deploy RAG app**
+```bash
+databricks bundle deploy
+databricks bundle run
+```
+
+**Use case**: Production RAG with automatic Delta → Lakebase sync
+
+---
+
+### **Option 3: Manual Ingestion (Custom Control)**
+
+```bash
+# Run one-time ingestion from Delta
+python ingest_to_lakebase.py
+
+# Or schedule as Databricks Job
+databricks bundle deploy -t ingestion_job
+```
+
+**Use case**: Custom ingestion logic, one-time imports, migrations
+
+---
+
+## 📋 Configuration
+
+### **config.yaml**
+```yaml
+rag:
+  enabled: true
+  vector_store: "lakebase"
+  
+  lakebase:
+    host: "${LAKEBASE_HOST}"
+    database: "${LAKEBASE_DATABASE}"
+    table: "documents"
+    top_k: 5
+    index_type: "hnsw"  # Matches Databricks Vector Search
+  
+  embedding:
+    endpoint: "databricks-bge-large-en"
+    dimension: 1024
+```
+
+### **app.yaml** (Set via Apps UI or secrets; never commit real values)
+```yaml
+env:
+  - name: "LAKEBASE_HOST"
+    value: ""   # Set in Databricks Apps UI or use secret reference
+  - name: "LAKEBASE_DATABASE"
+    value: "rag"
+  - name: "LAKEBASE_USER"
+    value: ""
+  - name: "LAKEBASE_PASSWORD"
+    value: ""   # Use Databricks secrets in production
+  - name: "EMBEDDING_ENDPOINT"
+    value: "databricks-bge-large-en"
+```
+
+---
+
+## 🧪 Testing
+
+### **Test RAG Queries**
+```
+Query: "What is Delta Lake?"
+Expected: Response using context from your documents
+
+Query: "Tell me about MLflow"
+Expected: Response with MLflow information
+
+Query: "How does Unity Catalog work?"
+Expected: Response about Unity Catalog
+```
+
+### **Verify Vector Search**
+Check Lakebase directly:
+```sql
+-- Connect to Lakebase
+SELECT COUNT(*) FROM documents;
+
+-- Test similarity search
+SELECT content, metadata 
+FROM documents 
+ORDER BY embedding <=> '[0.1, 0.2, ...]'::vector 
+LIMIT 5;
+```
+
+---
+
+## 📊 Monitoring
+
+### **DLT Pipeline Metrics**
+- Navigate to **Workflows** → **Delta Live Tables**
+- Select `{{ name }}_dlt_sync`
+- Monitor:
+  - Rows processed
+  - Embeddings generated
+  - Sync status to Lakebase
+
+### **RAG App Logs**
+```bash
+databricks apps logs {{ name }}
+```
+
+Look for:
+- `✅ RAG initialized (Lakebase pgvector)`
+- `📚 Retrieved X relevant documents`
+- `💾 Stored assistant message`
+
+---
+
+## 🔧 Troubleshooting
+
+### **Issue: No documents retrieved**
+```bash
+# Check Lakebase connection
+python -c "from lakebase_retriever import LakebaseRetriever; r = LakebaseRetriever(); print(r.conn)"
+
+# Verify documents exist
+# Run SQL: SELECT COUNT(*) FROM documents;
+```
+
+### **Issue: Embeddings not generating**
+```bash
+# Test embedding endpoint
+python -c "from embeddings import EmbeddingGenerator; e = EmbeddingGenerator(); print(e.generate_embedding('test'))"
+```
+
+### **Issue: DLT sync failing**
+- Check Change Data Feed is enabled on source table
+- Verify Lakebase credentials in pipeline config
+- Check DLT pipeline logs in Databricks UI
+
+---
+
+## 📚 Additional Resources
+
+- [Databricks Vector Search](https://docs.databricks.com/aws/en/vector-search/vector-search)
+- [Delta-to-Lakebase Sync](https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table)
+- [Delta Live Tables](https://docs.databricks.com/aws/en/delta-live-tables/index.html)
+- [Foundation Model APIs](https://docs.databricks.com/aws/en/machine-learning/foundation-models/index.html)
+
+---
+
+## 🎯 Next Steps
+
+1. ✅ Choose ingestion method (Sample / DLT / Manual)
+2. ✅ Populate Lakebase with documents
+3. ✅ Deploy RAG app
+4. ✅ Test queries
+5. ✅ Monitor and optimize
+
+**For production**: Use **Option 2 (DLT Sync)** for automatic, continuous sync from Delta to Lakebase.

@@ -1,0 +1,91 @@
+"""
+Quick setup script to populate Lakebase with sample documents for testing.
+
+For production, use ingest_to_lakebase.py with a Databricks Job.
+"""
+
+import os
+from lakebase_retriever import LakebaseRetriever
+from embeddings import EmbeddingGenerator
+
+# Sample documents about Databricks
+SAMPLE_DOCUMENTS = [
+    {
+        "content": "Databricks is a unified data analytics platform built on Apache Spark. "
+        "It provides collaborative notebooks, automated cluster management, and "
+        "production job scheduling for big data processing.",
+        "metadata": {"source": "databricks_overview", "category": "platform"},
+    },
+    {
+        "content": "Delta Lake is an open-source storage framework that brings ACID "
+        "transactions to Apache Spark and big data workloads. It provides "
+        "time travel, schema enforcement, and unified batch and streaming.",
+        "metadata": {"source": "delta_lake", "category": "storage"},
+    },
+    {
+        "content": "MLflow is an open-source platform for managing the end-to-end machine "
+        "learning lifecycle. It includes experiment tracking, model registry, "
+        "model deployment, and model monitoring capabilities.",
+        "metadata": {"source": "mlflow", "category": "ml_platform"},
+    },
+    {
+        "content": "Unity Catalog is a unified governance solution for data and AI on "
+        "Databricks. It provides centralized access control, auditing, lineage, "
+        "and data discovery across clouds.",
+        "metadata": {"source": "unity_catalog", "category": "governance"},
+    },
+    {
+        "content": "Databricks Vector Search is a fully managed, serverless vector "
+        "database that enables you to build production-ready RAG applications. "
+        "It automatically syncs with Delta tables and supports real-time updates.",
+        "metadata": {"source": "vector_search", "category": "rag"},
+    },
+]
+
+
+def main():
+    """Setup sample data for testing."""
+    print("🚀 Setting up Lakebase with sample data...\n")
+
+    # Initialize components
+    print("1️⃣ Connecting to Lakebase...")
+    retriever = LakebaseRetriever()
+
+    print("2️⃣ Creating documents table with pgvector...")
+    retriever.create_table(embedding_dim=1024)
+
+    print("3️⃣ Initializing embedding generator...")
+    embedding_gen = EmbeddingGenerator()
+
+    print("4️⃣ Generating embeddings for sample documents...")
+    docs_with_embeddings = []
+    for i, doc in enumerate(SAMPLE_DOCUMENTS):
+        print(f"   - Document {i+1}/{len(SAMPLE_DOCUMENTS)}: {doc['content'][:50]}...")
+        embedding = embedding_gen.generate_embedding(doc["content"])
+        docs_with_embeddings.append(
+            {
+                "content": doc["content"],
+                "embedding": embedding,
+                "metadata": doc["metadata"],
+            }
+        )
+
+    print("5️⃣ Storing documents in Lakebase...")
+    retriever.add_documents(docs_with_embeddings)
+
+    print("\n✅ Setup complete!")
+    print(f"📊 Added {len(SAMPLE_DOCUMENTS)} documents to Lakebase")
+    print("\n📋 Next steps:")
+    print("   1. Deploy app: databricks bundle deploy")
+    print("   2. Run app: databricks bundle run")
+    print("   3. Test queries:")
+    print("      - 'What is Delta Lake?'")
+    print("      - 'Tell me about MLflow'")
+    print("      - 'How does Unity Catalog work?'")
+    print("\n💡 For production, use ingest_to_lakebase.py to sync from Delta tables")
+
+    retriever.close()
+
+
+if __name__ == "__main__":
+    main()

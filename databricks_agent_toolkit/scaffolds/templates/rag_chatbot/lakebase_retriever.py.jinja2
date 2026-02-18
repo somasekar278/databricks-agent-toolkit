@@ -1,0 +1,181 @@
+"""
+Lakebase pgvector-based document retriever for RAG.
+
+Uses PostgreSQL with pgvector extension for semantic search.
+"""
+
+import os
+from typing import List, Dict, Any, Optional
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+
+class LakebaseRetriever:
+    """Retriever using Lakebase with pgvector for semantic search."""
+
+    def __init__(
+        self,
+        host: Optional[str] = None,
+        database: Optional[str] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        table: str = "documents",
+        top_k: int = 5,
+        index_type: str = "hnsw",
+    ):
+        """
+        Initialize Lakebase retriever.
+
+        Args:
+            host: Lakebase host (default: from LAKEBASE_HOST or PGHOST env)
+            database: Database name (default: from LAKEBASE_DATABASE or PGDATABASE env)
+            user: Username (default: from LAKEBASE_USER or PGUSER env)
+            password: Password (default: from LAKEBASE_PASSWORD or PGPASSWORD env)
+            table: Table name containing documents and embeddings
+            top_k: Number of results to retrieve
+            index_type: Vector index type - "hnsw" (matches Databricks official pattern, 
+                       more accurate) or "ivfflat" (faster to build, less memory)
+        """
+        self.host = host or os.getenv("LAKEBASE_HOST") or os.getenv("PGHOST")
+        self.database = database or os.getenv("LAKEBASE_DATABASE") or os.getenv("PGDATABASE")
+        self.user = user or os.getenv("LAKEBASE_USER") or os.getenv("PGUSER")
+        self.password = password or os.getenv("LAKEBASE_PASSWORD") or os.getenv("PGPASSWORD")
+        self.table = table
+        self.top_k = top_k
+        self.index_type = index_type.lower()
+
+        # Validate index type
+        if self.index_type not in ["hnsw", "ivfflat"]:
+            raise ValueError(f"Invalid index_type: {index_type}. Must be 'hnsw' or 'ivfflat'")
+
+        if not all([self.host, self.database, self.user, self.password]):
+            raise ValueError(
+                "Missing Lakebase credentials. Provide via arguments or environment variables:\n"
+                "LAKEBASE_HOST/PGHOST, LAKEBASE_DATABASE/PGDATABASE, "
+                "LAKEBASE_USER/PGUSER, LAKEBASE_PASSWORD/PGPASSWORD"
+            )
+
+        self.conn = None
+        self._connect()
+
+    def _connect(self) -> None:
+        """Establish connection to Lakebase."""
+        try:
+            self.conn = psycopg2.connect(
+                host=self.host,
+                database=self.database,
+                user=self.user,
+                password=self.password,
+                sslmode=os.getenv("PGSSLMODE", "require"),
+                connect_timeout=10,
+            )
+            print(f"✅ Connected to Lakebase: {self.host}/{self.database}")
+        except Exception as e:
+            raise ConnectionError(f"Failed to connect to Lakebase: {e}")
+
+    def create_table(self, embedding_dim: int = 1024) -> None:
+        """
+        Create documents table with pgvector extension.
+
+        Args:
+            embedding_dim: Dimension of embeddings (default: 1024 for BGE-large)
+        """
+        with self.conn.cursor() as cur:
+            # Enable pgvector extension
+            cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
+
+            # Create documents table
+            cur.execute(f"""
+                CREATE TABLE IF NOT EXISTS {self.table} (
+                    id SERIAL PRIMARY KEY,
+                    content TEXT NOT NULL,
+                    embedding vector({embedding_dim}),
+                    metadata JSONB,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            """)  # nosec B608
+
+            # Create index for fast similarity search
+            # HNSW: Matches Databricks official pattern (more accurate, slower to build)
+            # IVFFlat: Faster to build, uses less memory
+            if self.index_type == "hnsw":
+                cur.execute(f"""
+                    CREATE INDEX IF NOT EXISTS {self.table}_embedding_idx
+                    ON {self.table} USING hnsw (embedding vector_cosine_ops)
+                    WITH (m = 16, ef_construction = 64)
+                """)  # nosec B608
+            else:  # ivfflat
+                cur.execute(f"""
+                    CREATE INDEX IF NOT EXISTS {self.table}_embedding_idx
+                    ON {self.table} USING ivfflat (embedding vector_cosine_ops)
+                    WITH (lists = 100)
+                """)  # nosec B608
+
+            self.conn.commit()
+            print(f"✅ Table '{self.table}' ready with pgvector ({self.index_type.upper()} index)")
+
+    def add_documents(self, documents: List[Dict[str, Any]]) -> None:
+        """
+        Add documents with embeddings to Lakebase.
+
+        Args:
+            documents: List of dicts with 'content', 'embedding', 'metadata'
+        """
+        with self.conn.cursor() as cur:
+            for doc in documents:
+                cur.execute(
+                    f"""
+                    INSERT INTO {self.table} (content, embedding, metadata)
+                    VALUES (%s, %s, %s)
+                    """,  # nosec B608
+                    (
+                        doc["content"],
+                        doc["embedding"],
+                        doc.get("metadata"),
+                    ),
+                )
+            self.conn.commit()
+            print(f"✅ Added {len(documents)} documents to {self.table}")
+
+    def retrieve(self, query_embedding: List[float]) -> List[Dict[str, Any]]:
+        """
+        Retrieve most similar documents using cosine similarity.
+
+        Args:
+            query_embedding: Query embedding vector
+
+        Returns:
+            List of documents with content, metadata, and similarity score
+        """
+        with self.conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                f"""
+                SELECT
+                    id,
+                    content,
+                    metadata,
+                    1 - (embedding <=> %s::vector) AS similarity
+                FROM {self.table}
+                WHERE embedding IS NOT NULL
+                ORDER BY embedding <=> %s::vector
+                LIMIT %s
+                """,  # nosec B608
+                (query_embedding, query_embedding, self.top_k),
+            )
+            results = cur.fetchall()
+
+        return [dict(row) for row in results]
+
+    def close(self) -> None:
+        """Close database connection."""
+        if self.conn:
+            self.conn.close()
+            print("✅ Lakebase connection closed")
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.close()

@@ -1,0 +1,49 @@
+# Databricks Job configuration for automated ingestion
+# Syncs documents from Unity Catalog Delta Table to Lakebase
+
+resources:
+  jobs:
+    {{ name }}_ingestion:
+      name: "{{ name }}_ingestion"
+      description: "Ingest documents from Delta to Lakebase for RAG"
+      
+      tasks:
+        - task_key: ingest_to_lakebase
+          notebook_task:
+            notebook_path: ./ingest_to_lakebase
+            source: WORKSPACE
+          
+          new_cluster:
+            spark_version: "14.3.x-scala2.12"
+            node_type_id: "i3.xlarge"
+            num_workers: 2
+            spark_conf:
+              "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+          
+          libraries:
+            - pypi:
+                package: "mlflow>=2.21.2"
+            - pypi:
+                package: "psycopg2-binary>=2.9.9"
+            - pypi:
+                package: "pgvector>=0.2.5"
+      
+      # Schedule: Run every hour to sync new documents
+      schedule:
+        quartz_cron_expression: "0 0 * * * ?"  # Every hour
+        timezone_id: "UTC"
+        pause_status: "PAUSED"  # Start paused, enable when ready
+      
+      # Email notifications
+      email_notifications:
+        on_failure:
+          - ${workspace.current_user.email}
+      
+      # Parameters
+      parameters:
+        - name: SOURCE_TABLE
+          default: "catalog.schema.documents"
+        - name: CONTENT_COLUMN
+          default: "content"
+        - name: METADATA_COLUMNS
+          default: "source,category,timestamp"

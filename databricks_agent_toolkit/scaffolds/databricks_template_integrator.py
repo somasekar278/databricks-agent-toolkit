@@ -240,9 +240,261 @@ Generated using **Databricks Agent Toolkit** with official {ui.capitalize()} tem
 
     def integrate_rag(self, output_dir: Path, rag_config: Dict[str, Any]) -> None:
         """Add RAG capabilities to the template (for L2+)."""
-        # TODO: Inject RAG manager into the app
-        print("⚠️  RAG integration not yet implemented for Databricks templates")
-        print("   Will be added in future update")
+        vector_store = rag_config.get("vector_store", "lakebase")
+        ui = rag_config.get("ui", "streamlit")
+
+        print(f"🧠 Integrating RAG with {vector_store} vector store...")
+
+        # Only Streamlit is supported for now
+        if ui != "streamlit":
+            print(f"⚠️  RAG not yet supported for {ui} - only Streamlit")
+            return
+
+        # 1. Copy RAG modules
+        self._copy_rag_modules(output_dir)
+
+        # 2. Inject RAG logic into app.py
+        self._inject_rag_into_streamlit(output_dir, vector_store)
+
+        # 3. Add vector store config to app.yaml
+        if vector_store == "lakebase":
+            self._add_lakebase_env_vars(output_dir)
+
+        # 4. Add RAG dependencies
+        self._add_rag_dependencies(output_dir)
+
+        # 5. Copy config.yaml
+        self._copy_rag_config(output_dir, rag_config)
+
+        print("✅ RAG integration complete")
+
+    def _copy_rag_modules(self, output_dir: Path) -> None:
+        """Copy and render RAG modules to the output directory."""
+        templates_dir = Path(__file__).parent / "templates" / "rag_chatbot"
+
+        rag_files = [
+            # Core RAG components
+            "lakebase_retriever.py.jinja2",
+            "embeddings.py.jinja2",
+            
+            # Quick start (testing)
+            "setup_sample_data.py.jinja2",      # Quick: Direct to Lakebase
+            "generate_sample_docs.py.jinja2",   # Full pipeline: Creates .txt files
+            
+            # Production ingestion pipeline (DABs)
+            "data_ingestion_job.py.jinja2",
+            "databricks_rag.yml.jinja2",  # Complete DABs: Volume, Lakebase, Synced Table, Job, App
+            
+            # Documentation
+            "RAG_COMPLETE_GUIDE.md.jinja2",
+        ]
+
+        for file_name in rag_files:
+            src = templates_dir / file_name
+            if not src.exists():
+                print(f"⚠️  Template not found: {src}")
+                continue
+
+            # Remove .jinja2 extension
+            dest_name = file_name.replace(".jinja2", "")
+            dest = output_dir / dest_name
+
+            # Render Jinja2 template if needed
+            content = src.read_text()
+            if "{{" in content or "{%" in content:
+                # Get context from existing config
+                context = self._get_rag_context(output_dir)
+                from jinja2 import Template
+                template = Template(content)
+                rendered = template.render(**context)
+                dest.write_text(rendered)
+                print(f"✅ Rendered {dest_name}")
+            else:
+                shutil.copy(src, dest)
+                print(f"✅ Added {dest_name}")
+
+    def _get_rag_context(self, output_dir: Path) -> Dict[str, Any]:
+        """Extract context for rendering RAG templates."""
+        import yaml
+        
+        # Try to get name from directory
+        name = output_dir.name
+        
+        # Try to get config from config.yaml
+        config_path = output_dir / "config.yaml"
+        if config_path.exists():
+            with open(config_path) as f:
+                config = yaml.safe_load(f)
+                rag_config = config.get("rag", {})
+        else:
+            rag_config = {}
+        
+        # Build context for Jinja2
+        return {
+            "name": name,
+            "rag": rag_config,
+        }
+
+    def _inject_rag_into_streamlit(self, output_dir: Path, vector_store: str) -> None:
+        """Inject RAG logic into Streamlit app.py."""
+        app_py_path = output_dir / "app.py"
+        if not app_py_path.exists():
+            print("⚠️  app.py not found, skipping RAG injection")
+            return
+
+        content = app_py_path.read_text()
+
+        # Add RAG imports
+        rag_imports = """from lakebase_retriever import LakebaseRetriever
+from embeddings import EmbeddingGenerator
+"""
+
+        if "from lakebase_retriever import" not in content:
+            # Add after existing imports
+            content = content.replace(
+                "from collections import OrderedDict",
+                f"from collections import OrderedDict\n{rag_imports}",
+            )
+
+        # Initialize RAG components after SERVING_ENDPOINT check
+        rag_init = """
+# Initialize RAG components
+try:
+    embedding_generator = EmbeddingGenerator()
+    retriever = LakebaseRetriever()
+    print("✅ RAG initialized (Lakebase pgvector)")
+except Exception as e:
+    print(f"⚠️  RAG initialization failed: {e}")
+    print("   Falling back to non-RAG mode")
+    embedding_generator = None
+    retriever = None
+"""
+
+        if "embedding_generator = EmbeddingGenerator()" not in content:
+            content = content.replace(
+                "ENDPOINT_SUPPORTS_FEEDBACK = endpoint_supports_feedback(SERVING_ENDPOINT)",
+                f"ENDPOINT_SUPPORTS_FEEDBACK = endpoint_supports_feedback(SERVING_ENDPOINT)\n{rag_init}",
+            )
+
+        # Inject RAG retrieval before LLM call
+        rag_retrieval = """
+    # RAG: Retrieve relevant documents and augment prompt
+    if retriever and embedding_generator:
+        try:
+            # Generate embedding for user query
+            query_embedding = embedding_generator.generate_embedding(prompt)
+
+            # Retrieve similar documents
+            context_docs = retriever.retrieve(query_embedding)
+
+            if context_docs:
+                print(f"📚 Retrieved {len(context_docs)} relevant documents")
+
+                # Build context from retrieved docs
+                context_text = "\\n\\n".join([
+                    f"[Document {i+1}]\\n{doc['content']}"
+                    for i, doc in enumerate(context_docs)
+                ])
+
+                # Augment prompt with context
+                augmented_prompt = f\"\"\"Context information:
+{context_text}
+
+User question: {prompt}
+
+Please answer based on the context provided above.\"\"\"
+
+                # Replace original prompt with augmented one
+                prompt = augmented_prompt
+        except Exception as e:
+            print(f"⚠️  RAG retrieval failed: {e}")
+            # Continue without RAG
+
+"""
+
+        # Inject before the user message is added to history
+        if "# RAG: Retrieve relevant documents" not in content:
+            # Find where we add user message to history
+            if "user_msg = UserMessage(content=prompt)" in content:
+                content = content.replace(
+                    "# Add user message to chat history\n    user_msg = UserMessage(content=prompt)",
+                    f"{rag_retrieval}    # Add user message to chat history\n    user_msg = UserMessage(content=prompt)",
+                )
+
+        app_py_path.write_text(content)
+        print("✅ Injected RAG logic into app.py")
+
+    def _add_lakebase_env_vars(self, output_dir: Path) -> None:
+        """Add Lakebase environment variables to app.yaml."""
+        app_yaml_path = output_dir / "app.yaml"
+        if not app_yaml_path.exists():
+            print("⚠️  app.yaml not found, skipping Lakebase config")
+            return
+
+        content = app_yaml_path.read_text()
+
+        # Add Lakebase env vars for RAG (no literal credentials; use Apps UI or secrets)
+        lakebase_env = """  # Lakebase: set in Databricks Apps UI or via secrets; never commit real values
+  - name: "LAKEBASE_HOST"
+    value: ""  # Or use secret reference
+  - name: "LAKEBASE_DATABASE"
+    value: "rag"
+  - name: "LAKEBASE_USER"
+    value: ""
+  - name: "LAKEBASE_PASSWORD"
+    value: ""  # Use Databricks secrets in production
+  - name: "PGSSLMODE"
+    value: "require"
+  - name: "PGCHANNELBINDING"
+    value: "prefer"
+  - name: "EMBEDDING_ENDPOINT"
+    value: "databricks-bge-large-en"
+"""
+
+        # Add after SERVING_ENDPOINT
+        if "LAKEBASE_HOST" not in content:
+            # Append to the end of env section (or end of file)
+            if not content.endswith("\n"):
+                content += "\n"
+            content += lakebase_env
+            app_yaml_path.write_text(content)
+            print("✅ Added Lakebase configuration to app.yaml")
+            print("⚠️  Update app.yaml with your Lakebase credentials")
+
+    def _add_rag_dependencies(self, output_dir: Path) -> None:
+        """Add RAG dependencies to requirements.txt."""
+        req_path = output_dir / "requirements.txt"
+        if not req_path.exists():
+            print("⚠️  requirements.txt not found")
+            return
+
+        content = req_path.read_text()
+
+        rag_deps = "\n# RAG dependencies\npsycopg2-binary>=2.9.9\npgvector>=0.2.5\n"
+
+        if "psycopg2-binary" not in content:
+            content += rag_deps
+            req_path.write_text(content)
+            print("✅ Added RAG dependencies to requirements.txt")
+
+    def _copy_rag_config(self, output_dir: Path, rag_config: Dict[str, Any]) -> None:
+        """Copy and customize config.yaml for RAG."""
+        templates_dir = Path(__file__).parent / "templates" / "rag_chatbot"
+        config_template = templates_dir / "config.yaml.jinja2"
+
+        if not config_template.exists():
+            print("⚠️  config.yaml.jinja2 not found")
+            return
+
+        # Render config template
+        from jinja2 import Template
+
+        template = Template(config_template.read_text())
+        rendered = template.render(name=output_dir.name, model=rag_config.get("model", "databricks-claude-sonnet-4"))
+
+        config_path = output_dir / "config.yaml"
+        config_path.write_text(rendered)
+        print("✅ Added config.yaml")
 
 
 def generate_with_databricks_template(name: str, level: str, options: Dict[str, Any], output_dir: str) -> Path:
@@ -273,7 +525,11 @@ def generate_with_databricks_template(name: str, level: str, options: Dict[str, 
 
     # Add RAG if enabled
     if options.get("enable_rag"):
-        rag_config = {}  # TODO: Extract from options
+        rag_config = {
+            "vector_store": options.get("vector_store", "lakebase"),
+            "ui": ui,
+            "model": options.get("model", "databricks-claude-sonnet-4"),
+        }
         integrator.integrate_rag(output_path, rag_config)
 
     return output_path

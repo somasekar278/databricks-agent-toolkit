@@ -25,7 +25,7 @@ cd my-agent
 **Option A: Environment Variables** (Recommended for production)
 ```bash
 export DATABRICKS_HOST="https://your-workspace.cloud.databricks.com"
-export DATABRICKS_TOKEN="REDACTED"
+export DATABRICKS_TOKEN="dapi123..."
 ```
 
 **Option B: Databricks CLI** (Recommended for development)

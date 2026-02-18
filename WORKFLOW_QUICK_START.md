@@ -254,7 +254,7 @@ dat auth check
 
 # Set credentials
 export DATABRICKS_HOST=https://your-workspace.cloud.databricks.com
-export DATABRICKS_TOKEN=REDACTED
+export DATABRICKS_TOKEN=your-token
 ```
 
 ### App Doesn't Start After Deploy

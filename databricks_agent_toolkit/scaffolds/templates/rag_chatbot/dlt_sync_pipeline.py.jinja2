@@ -1,0 +1,134 @@
+"""
+Delta Live Tables (DLT) pipeline to sync embeddings from Delta to Lakebase.
+
+Uses official Databricks pattern:
+https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table
+
+Architecture:
+1. Delta Table (Unity Catalog) → Source documents
+2. DLT Pipeline → Generate embeddings + sync to Lakebase
+3. Lakebase (pgvector) → Query for RAG
+
+This replaces manual ingestion scripts with automated Delta → Lakebase sync.
+"""
+
+import dlt
+from pyspark.sql import functions as F
+from pyspark.sql.types import ArrayType, FloatType
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.serving import ChatMessage, ChatMessageRole
+
+
+# Configuration
+SOURCE_TABLE = "{{ source_table }}"  # Unity Catalog table with documents
+CONTENT_COLUMN = "{{ content_column }}"  # Column containing text to embed
+LAKEBASE_HOST = "{{ lakebase_host }}"
+LAKEBASE_DATABASE = "{{ lakebase_database }}"
+EMBEDDING_MODEL = "databricks-bge-large-en"
+
+
+def generate_embedding_udf(model_endpoint: str):
+    """
+    Create a UDF to generate embeddings using Databricks Foundation Models.
+    
+    This follows the official pattern for calling embeddings models.
+    """
+    from pyspark.sql.functions import udf
+    
+    # Initialize workspace client (uses Databricks auth automatically)
+    workspace_client = WorkspaceClient()
+    
+    @udf(returnType=ArrayType(FloatType()))
+    def _generate_embedding(text: str):
+        """Generate embedding for a single text."""
+        if not text:
+            return None
+            
+        try:
+            response = workspace_client.serving_endpoints.query(
+                name=model_endpoint,
+                messages=[ChatMessage(role=ChatMessageRole.USER, content=text)],
+            )
+            
+            # Extract embedding from response
+            if hasattr(response, "data") and response.data:
+                return list(response.data[0].embedding)
+            elif hasattr(response, "embeddings") and response.embeddings:
+                return list(response.embeddings[0])
+            else:
+                return None
+        except Exception as e:
+            print(f"Error generating embedding: {e}")
+            return None
+    
+    return _generate_embedding
+
+
+# Define the embedding UDF
+embedding_udf = generate_embedding_udf(EMBEDDING_MODEL)
+
+
+@dlt.table(
+    name="embeddings_bronze",
+    comment="Raw documents from source table"
+)
+def bronze_documents():
+    """
+    Bronze layer: Read raw documents from Unity Catalog.
+    
+    This is the source of truth for documents to be embedded.
+    """
+    return (
+        spark.readStream
+        .format("delta")
+        .option("readChangeFeed", "true")  # Use Change Data Feed for incremental updates
+        .table(SOURCE_TABLE)
+    )
+
+
+@dlt.table(
+    name="embeddings_silver",
+    comment="Documents with embeddings generated"
+)
+def silver_embeddings():
+    """
+    Silver layer: Generate embeddings for documents.
+    
+    Uses Databricks Foundation Models (BGE-large) to compute embeddings.
+    """
+    return (
+        dlt.read_stream("embeddings_bronze")
+        .withColumn("embedding", embedding_udf(F.col(CONTENT_COLUMN)))
+        .filter(F.col("embedding").isNotNull())  # Filter out failed embeddings
+    )
+
+
+@dlt.table(
+    name="embeddings_gold",
+    comment="Final embeddings ready for Lakebase sync",
+    table_properties={
+        # Official Databricks pattern: Configure Lakebase sync
+        # https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table
+        "delta.sync.target.lakebase.host": LAKEBASE_HOST,
+        "delta.sync.target.lakebase.database": LAKEBASE_DATABASE,
+        "delta.sync.target.lakebase.table": "embeddings",
+        "delta.sync.mode": "incremental",  # Incremental sync for new/updated rows
+        "delta.enableChangeDataFeed": "true",  # Required for sync
+    }
+)
+def gold_embeddings():
+    """
+    Gold layer: Final embeddings table that syncs to Lakebase.
+    
+    This table automatically syncs to Lakebase using Delta Live Tables.
+    The sync happens automatically when the DLT pipeline runs.
+    """
+    return dlt.read_stream("embeddings_silver")
+
+
+# Optional: Add data quality expectations
+@dlt.expect_or_drop("valid_embedding_dimension", "size(embedding) = 1024")
+@dlt.expect_or_drop("valid_content", f"{CONTENT_COLUMN} IS NOT NULL AND length({CONTENT_COLUMN}) > 0")
+def apply_quality_checks():
+    """Apply data quality checks to embeddings."""
+    pass

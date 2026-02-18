@@ -248,14 +248,14 @@ databricks configure
 **Option 2: Environment Variables**
 ```bash
 export DATABRICKS_HOST="https://your-workspace.cloud.databricks.com"
-export DATABRICKS_TOKEN="REDACTED"
+export DATABRICKS_TOKEN="your-token"
 ```
 
 **Option 3: .databrickscfg**
 ```ini
 [DEFAULT]
 host = https://your-workspace.cloud.databricks.com
-token = REDACTED
+token = your-token
 ```
 
 ### Databricks Apps (Production)

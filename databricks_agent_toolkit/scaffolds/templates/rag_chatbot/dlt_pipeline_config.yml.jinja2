@@ -1,0 +1,84 @@
+# Delta Live Tables Pipeline Configuration
+# Syncs documents from Delta to Lakebase using official Databricks pattern
+# https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table
+
+resources:
+  pipelines:
+    {{ name }}_dlt_sync:
+      name: "{{ name }}_dlt_sync"
+      
+      # Target catalog and schema for DLT tables
+      catalog: "${var.catalog}"
+      target: "${var.schema}"
+      
+      # DLT pipeline configuration
+      configuration:
+        # Source table configuration
+        source.table: "${var.source_table}"
+        source.content_column: "${var.content_column}"
+        
+        # Lakebase configuration
+        lakebase.host: "${var.lakebase_host}"
+        lakebase.database: "${var.lakebase_database}"
+        lakebase.user: "${var.lakebase_user}"
+        lakebase.password: "${var.lakebase_password}"
+        
+        # Embedding model
+        embedding.model: "databricks-bge-large-en"
+      
+      # Libraries
+      libraries:
+        - notebook:
+            path: ./dlt_sync_pipeline.py
+      
+      # Cluster configuration
+      clusters:
+        - label: "default"
+          spark_version: "14.3.x-scala2.12"
+          node_type_id: "i3.xlarge"
+          num_workers: 2
+          spark_conf:
+            "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "true"
+      
+      # Development mode (change to PRODUCTION for prod)
+      development: true
+      
+      # Continuous execution (always-on sync)
+      continuous: false
+      
+      # Channel for updates
+      channel: "CURRENT"
+
+# Variables for pipeline configuration
+variables:
+  catalog:
+    default: "main"
+    description: "Unity Catalog catalog name"
+  
+  schema:
+    default: "default"
+    description: "Unity Catalog schema name"
+  
+  source_table:
+    default: "main.default.documents"
+    description: "Source Delta table with documents (catalog.schema.table)"
+  
+  content_column:
+    default: "content"
+    description: "Column name containing text to embed"
+  
+  lakebase_host:
+    default: ""
+    description: "Lakebase host (set via bundle var or env LAKEBASE_HOST; never commit real host)"
+  
+  lakebase_database:
+    default: "rag"
+    description: "Lakebase database name"
+  
+  lakebase_user:
+    default: ""
+    description: "Lakebase username (set via bundle var or env LAKEBASE_USER)"
+  
+  lakebase_password:
+    default: ""
+    description: "Lakebase password (set via bundle var or Databricks secrets only; never commit)"

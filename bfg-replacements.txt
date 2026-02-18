@@ -1,0 +1,12 @@
+# BFG Repo-Cleaner: redact credential placeholders across all history
+# Format: literal==>replacement  (or literal alone => ***REMOVED***)
+# Run: bfg --replace-text bfg-replacements.txt .
+
+your_password==>REDACTED
+your_user==>REDACTED
+your-password==>REDACTED
+your-user==>REDACTED
+your-token==>REDACTED
+dapi123...==>REDACTED
+your-lakebase-host.cloud.databricks.com==>REDACTED
+your-lakebase-instance-name==>REDACTED

@@ -1,0 +1,117 @@
+"""
+Setup Synced Table for Delta → Lakebase synchronization.
+
+Run this AFTER the ingestion job creates the Delta table with embeddings.
+This creates a Synced Table that automatically syncs embeddings to Lakebase.
+
+Official Databricks Pattern:
+https://docs.databricks.com/aws/en/oltp/instances/sync-data/sync-table
+"""
+
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.database import (
+    SyncedDatabaseTable,
+    SyncedTableSpec,
+    SyncedTableSchedulingPolicy,
+    NewPipelineSpec
+)
+
+
+# Configuration
+DELTA_TABLE = "main.default.{{ name }}_embeddings"  # Source Delta table
+LAKEBASE_INSTANCE = "{{ lakebase_instance_name }}"  # Your Lakebase instance name
+LAKEBASE_DATABASE = "{{ lakebase_database }}"  # Postgres database name
+SYNCED_TABLE_NAME = f"{DELTA_TABLE}_synced"  # Name in Unity Catalog
+
+
+def create_synced_table():
+    """
+    Create a synced table that automatically syncs Delta → Lakebase.
+    
+    The synced table:
+    - Reads from Delta table (with CDF enabled)
+    - Automatically syncs changes to Lakebase
+    - Creates pgvector index in Lakebase
+    - Keeps data in sync continuously
+    """
+    print("🔄 Setting up Synced Table (Delta → Lakebase)...")
+    print(f"   Source: {DELTA_TABLE}")
+    print(f"   Target: {LAKEBASE_INSTANCE}/{LAKEBASE_DATABASE}")
+    
+    w = WorkspaceClient()
+    
+    try:
+        # Create synced table
+        synced_table = w.database.create_synced_database_table(
+            SyncedDatabaseTable(
+                name=SYNCED_TABLE_NAME,
+                database_instance_name=LAKEBASE_INSTANCE,
+                logical_database_name=LAKEBASE_DATABASE,
+                spec=SyncedTableSpec(
+                    source_table_full_name=DELTA_TABLE,
+                    primary_key_columns=["id"],  # Primary key for efficient sync
+                    scheduling_policy=SyncedTableSchedulingPolicy.CONTINUOUS,  # Continuous sync
+                    create_database_objects_if_missing=True,  # Auto-create DB if needed
+                    
+                    # Storage for staging (required for standard catalogs)
+                    new_pipeline_spec=NewPipelineSpec(
+                        storage_catalog="main",
+                        storage_schema="default"
+                    )
+                ),
+            )
+        )
+        
+        print(f"✅ Created synced table: {synced_table.name}")
+        print(f"   Status: {synced_table.data_synchronization_status.detailed_state}")
+        print(f"\n📋 Next steps:")
+        print(f"   1. Wait for sync to complete (check status in UI)")
+        print(f"   2. Verify in Lakebase: SELECT COUNT(*) FROM embeddings;")
+        print(f"   3. Deploy RAG app: databricks bundle deploy")
+        
+    except Exception as e:
+        print(f"❌ Error creating synced table: {e}")
+        print(f"\n💡 Troubleshooting:")
+        print(f"   - Ensure Delta table exists: {DELTA_TABLE}")
+        print(f"   - Ensure Change Data Feed is enabled on Delta table")
+        print(f"   - Verify Lakebase instance name: {LAKEBASE_INSTANCE}")
+        print(f"   - Check permissions on Delta table and Lakebase instance")
+        raise
+
+
+def check_sync_status():
+    """Check the status of the synced table."""
+    w = WorkspaceClient()
+    
+    try:
+        status = w.database.get_synced_database_table(name=SYNCED_TABLE_NAME)
+        print(f"\n📊 Sync Status:")
+        print(f"   State: {status.data_synchronization_status.detailed_state}")
+        print(f"   Message: {status.data_synchronization_status.message}")
+        
+        if status.data_synchronization_status.detailed_state == "ONLINE":
+            print(f"   ✅ Sync is active and running!")
+        else:
+            print(f"   ⏳ Sync is in progress...")
+            
+    except Exception as e:
+        print(f"❌ Error checking status: {e}")
+
+
+def main():
+    """Main setup flow."""
+    print("\n" + "="*70)
+    print("  SYNCED TABLE SETUP (Delta → Lakebase)")
+    print("="*70 + "\n")
+    
+    # Create synced table
+    create_synced_table()
+    
+    # Check initial status
+    print("\n" + "="*70)
+    check_sync_status()
+    print("="*70 + "\n")
+
+
+if __name__ == "__main__":
+    main()

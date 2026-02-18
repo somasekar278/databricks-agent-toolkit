@@ -1,0 +1,201 @@
+"""
+Databricks job to ingest documents from Unity Catalog into Lakebase for RAG.
+
+This script follows the official Databricks Vector Search pattern:
+1. Read from Delta Table (Unity Catalog)
+2. Chunk documents
+3. Generate embeddings (Databricks Foundation Models)
+4. Store in Lakebase pgvector
+
+Run as a Databricks Job for automated ingestion.
+"""
+
+import os
+from typing import List, Dict, Any
+from pyspark.sql import SparkSession
+from databricks.sdk import WorkspaceClient
+
+from lakebase_retriever import LakebaseRetriever
+from embeddings import EmbeddingGenerator, chunk_text
+
+
+class DeltaToLakebaseIngestion:
+    """Ingest documents from Delta Table to Lakebase pgvector."""
+
+    def __init__(
+        self,
+        source_table: str,
+        content_column: str,
+        metadata_columns: List[str] = None,
+        chunk_size: int = 512,
+        chunk_overlap: int = 50,
+    ):
+        """
+        Initialize ingestion pipeline.
+
+        Args:
+            source_table: Unity Catalog table (e.g., "catalog.schema.documents")
+            content_column: Column containing document text
+            metadata_columns: Additional columns to store as metadata
+            chunk_size: Size of text chunks for embedding
+            chunk_overlap: Overlap between chunks
+        """
+        self.source_table = source_table
+        self.content_column = content_column
+        self.metadata_columns = metadata_columns or []
+        self.chunk_size = chunk_size
+        self.chunk_overlap = chunk_overlap
+
+        # Initialize components
+        self.spark = SparkSession.builder.getOrCreate()
+        self.embedding_gen = EmbeddingGenerator()
+        self.retriever = LakebaseRetriever()
+
+        print(f"✅ Initialized ingestion pipeline")
+        print(f"   Source: {source_table}")
+        print(f"   Content column: {content_column}")
+        print(f"   Metadata columns: {metadata_columns}")
+
+    def run(self, incremental: bool = True) -> None:
+        """
+        Run the ingestion pipeline.
+
+        Args:
+            incremental: If True, only process new/changed rows (uses Delta CDF)
+        """
+        print("\n🚀 Starting ingestion pipeline...")
+
+        # 1. Setup Lakebase table
+        print("\n1️⃣ Setting up Lakebase table...")
+        self.retriever.create_table(embedding_dim=1024)
+
+        # 2. Read from Delta
+        print(f"\n2️⃣ Reading from Delta table: {self.source_table}")
+        df = self._read_delta_table(incremental)
+        row_count = df.count()
+        print(f"   Found {row_count} documents to process")
+
+        if row_count == 0:
+            print("✅ No new documents to ingest")
+            return
+
+        # 3. Process documents
+        print("\n3️⃣ Processing documents...")
+        documents = self._process_documents(df)
+        print(f"   Generated {len(documents)} chunks")
+
+        # 4. Generate embeddings
+        print("\n4️⃣ Generating embeddings...")
+        docs_with_embeddings = self._generate_embeddings(documents)
+
+        # 5. Store in Lakebase
+        print("\n5️⃣ Storing in Lakebase...")
+        self.retriever.add_documents(docs_with_embeddings)
+
+        print(f"\n✅ Ingestion complete! Processed {len(docs_with_embeddings)} chunks")
+
+    def _read_delta_table(self, incremental: bool) -> Any:
+        """Read documents from Delta table."""
+        if incremental:
+            # Use Change Data Feed for incremental updates
+            # https://docs.databricks.com/delta/delta-change-data-feed.html
+            try:
+                # Get the last processed version (store in a checkpoint table)
+                # For now, just read all changes
+                df = (
+                    self.spark.read.format("delta")
+                    .option("readChangeFeed", "true")
+                    .option("startingVersion", 0)
+                    .table(self.source_table)
+                )
+                # Filter for inserts and updates only
+                df = df.filter(df._change_type.isin(["insert", "update_postimage"]))
+            except Exception as e:
+                print(f"⚠️  CDF not available, falling back to full read: {e}")
+                df = self.spark.table(self.source_table)
+        else:
+            # Full refresh
+            df = self.spark.table(self.source_table)
+
+        return df
+
+    def _process_documents(self, df: Any) -> List[Dict[str, Any]]:
+        """Process documents: chunk text and prepare metadata."""
+        documents = []
+
+        # Collect to driver (for small datasets)
+        # For large datasets, consider using Pandas UDF
+        rows = df.select(self.content_column, *self.metadata_columns).collect()
+
+        for row in rows:
+            content = row[self.content_column]
+            if not content:
+                continue
+
+            # Chunk the document
+            chunks = chunk_text(content, self.chunk_size, self.chunk_overlap)
+
+            # Create metadata
+            metadata = {col: row[col] for col in self.metadata_columns if col in row.asDict()}
+
+            # Add each chunk as a separate document
+            for i, chunk in enumerate(chunks):
+                documents.append(
+                    {
+                        "content": chunk,
+                        "metadata": {
+                            **metadata,
+                            "chunk_index": i,
+                            "total_chunks": len(chunks),
+                        },
+                    }
+                )
+
+        return documents
+
+    def _generate_embeddings(self, documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Generate embeddings for all documents."""
+        texts = [doc["content"] for doc in documents]
+
+        # Generate embeddings in batches
+        embeddings = self.embedding_gen.generate_embeddings(texts, batch_size=32)
+
+        # Combine with documents
+        docs_with_embeddings = []
+        for doc, embedding in zip(documents, embeddings):
+            docs_with_embeddings.append(
+                {
+                    "content": doc["content"],
+                    "embedding": embedding,
+                    "metadata": doc["metadata"],
+                }
+            )
+
+        return docs_with_embeddings
+
+
+def main():
+    """Main entry point for Databricks job."""
+    # Configuration from environment or widgets
+    source_table = os.getenv("SOURCE_TABLE", "catalog.schema.documents")
+    content_column = os.getenv("CONTENT_COLUMN", "content")
+    metadata_columns = os.getenv("METADATA_COLUMNS", "").split(",")
+    metadata_columns = [col.strip() for col in metadata_columns if col.strip()]
+
+    print("🚀 Databricks → Lakebase Ingestion Job")
+    print(f"   Source: {source_table}")
+    print(f"   Content: {content_column}")
+    print(f"   Metadata: {metadata_columns}")
+
+    # Run ingestion
+    pipeline = DeltaToLakebaseIngestion(
+        source_table=source_table,
+        content_column=content_column,
+        metadata_columns=metadata_columns,
+    )
+
+    pipeline.run(incremental=True)
+
+
+if __name__ == "__main__":
+    main()

@@ -36,12 +36,12 @@ class Lakebase:
         ```python
         from databricks_agent_toolkit.integrations import Lakebase
 
-        # Initialize
+        # Initialize (use env LAKEBASE_* or pass at runtime; never hardcode)
         lakebase = Lakebase(
-            host="your-lakebase.cloud.databricks.com",
+            host=os.getenv("LAKEBASE_HOST"),
             database="agents",
-            user="REDACTED",
-            password="REDACTED"
+            user=os.getenv("LAKEBASE_USER"),
+            password=os.getenv("LAKEBASE_PASSWORD")
         )
 
         # Store conversation
